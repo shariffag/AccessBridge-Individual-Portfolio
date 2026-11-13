@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Clinic HIS · Care coordination · AccessBridge worklist</title>
+<meta name="description" content="AccessBridge Group 3 — coordinator worklist embedded in a simulated hospital information system. Synthetic data only.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>/* Fonts load without blocking: a plain <link> would hold the page scripts while Google Fonts answers (it can hang on some networks). The page uses the system fallback until Plex arrives. */
+(function(){try{var l=document.createElement("link");l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap";document.head.appendChild(l)}catch(e){}})();</script>
+<style>
+/* Layout: glass top bar + glass sidebar (HIS modules) beside a working column: scope bar, page header, view tabs, content cards. Teal accent, one amber "pop" per screen. */
+:root{
+ --font:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+ --font-ar:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif;
+ --bg:#edf3f3;--panel:#ffffff;--inset:#f3f7f7;--line:#d3e0e0;--line2:#e5eded;--ink:#0f2a2c;--muted:#4b6366;
+ --pri:#0b6e70;--pri-ink:#075a5c;--pri-soft:#dcf0ef;--pri-line:#a6d4d1;--on-pri:#ffffff;
+ --hero1:#0a6668;--hero2:#0f8a80;--pop:#f5b82e;--on-pop:#2b1d00;
+ --good:#17663f;--good-soft:#dcf2e5;--good-line:#9fd3b5;
+ --warn:#865100;--warn-soft:#fff0cc;--warn-line:#ecc977;
+ --bad:#b42318;--bad-soft:#fde6e3;--bad-line:#f1b2aa;
+ --glass:rgba(255,255,255,.72);--glass-line:rgba(255,255,255,.75);--glass-edge:rgba(15,42,44,.08);
+ --blob1:rgba(11,110,112,.17);--blob2:rgba(245,184,46,.15);
+ --shadow:0 1px 2px rgba(15,42,44,.05),0 8px 24px rgba(15,42,44,.06);
+ --shadow-pop:0 18px 50px rgba(15,42,44,.18);
+ --toast:rgba(12,38,40,.9);--on-toast:#ffffff;
+ --r-sm:10px;--r-md:14px;--r-lg:18px;--r-xl:22px;
+ /* aliases kept for the page's own scripts and inline styles */
+ --blue:var(--pri-ink);--blue2:var(--pri-soft);--blue3:var(--pri-line);--red:var(--bad);--grey2:var(--inset);--hover:var(--inset);--green:var(--good);--amber:var(--warn);--focus:var(--pri);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1617;--panel:#112224;--inset:#172e2f;--line:#28454a;--line2:#1f3739;--ink:#e2efee;--muted:#9db6b6;
+ --pri:#36beb6;--pri-ink:#6fd8d0;--pri-soft:#123a3a;--pri-line:#2a6764;--on-pri:#04201f;
+ --hero1:#0b4a4c;--hero2:#0f6660;
+ --good:#6fdca0;--good-soft:#123826;--good-line:#2c6a48;
+ --warn:#f2c35a;--warn-soft:#3a2d0b;--warn-line:#6f5718;
+ --bad:#ff8a80;--bad-soft:#401b1b;--bad-line:#7a3530;
+ --glass:rgba(17,34,36,.74);--glass-line:rgba(255,255,255,.08);--glass-edge:rgba(255,255,255,.06);
+ --blob1:rgba(54,190,182,.13);--blob2:rgba(245,184,46,.06);
+ --shadow:none;--shadow-pop:0 18px 50px rgba(0,0,0,.5);
+ --toast:rgba(226,239,238,.95);--on-toast:#0a1617;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0a1617;--panel:#112224;--inset:#172e2f;--line:#28454a;--line2:#1f3739;--ink:#e2efee;--muted:#9db6b6;
+ --pri:#36beb6;--pri-ink:#6fd8d0;--pri-soft:#123a3a;--pri-line:#2a6764;--on-pri:#04201f;
+ --hero1:#0b4a4c;--hero2:#0f6660;
+ --good:#6fdca0;--good-soft:#123826;--good-line:#2c6a48;
+ --warn:#f2c35a;--warn-soft:#3a2d0b;--warn-line:#6f5718;
+ --bad:#ff8a80;--bad-soft:#401b1b;--bad-line:#7a3530;
+ --glass:rgba(17,34,36,.74);--glass-line:rgba(255,255,255,.08);--glass-edge:rgba(255,255,255,.06);
+ --blob1:rgba(54,190,182,.13);--blob2:rgba(245,184,46,.06);
+ --shadow:none;--shadow-pop:0 18px 50px rgba(0,0,0,.5);
+ --toast:rgba(226,239,238,.95);--on-toast:#0a1617;color-scheme:dark}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 14.5px/1.55 var(--font);font-variant-numeric:tabular-nums}
+:root[lang="ar"] body{font-family:var(--font-ar);line-height:1.65}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1,h2,h3{text-wrap:balance}
+.bgfx{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(58rem 34rem at 105% -8%,var(--blob1),transparent 62%),radial-gradient(46rem 30rem at -12% 108%,var(--blob2),transparent 60%)}
+.skip{position:absolute;inset-inline-start:16px;top:-80px;z-index:50;background:var(--pri);color:var(--on-pri);padding:10px 16px;border-radius:var(--r-sm);font-weight:700;text-decoration:none}
+.skip:focus{top:12px}
+svg.ic{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* glass surfaces: top bar, sidebar, hero, walkthrough panel, toast */
+.topbar,.side,.wt{background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.topbar,.side,.wt{background:var(--panel)}}
+
+/* top bar */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--panel)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;gap:10px;min-height:62px;padding-block:8px;padding-inline:16px;border-bottom:1px solid var(--glass-edge)}
+.brand{display:flex;align-items:center;gap:10px;font-size:16px;letter-spacing:.1px;white-space:nowrap}
+.brand b{font-weight:700}
+.brand .mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--hero1),var(--hero2));color:#fff;display:grid;place-items:center;flex:none}
+.brand .mark svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.topbar .sp{flex:1}
+.iconbtn{display:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel);place-items:center;color:var(--ink)}
+.pillb{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-weight:600;font-size:14px;color:var(--ink)}
+.pillb:hover,.iconbtn:hover{border-color:var(--pri-line);background:var(--pri-soft)}
+#lang::before,#theme::before{content:"";width:18px;height:18px;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat}
+#lang{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'/%3E%3C/svg%3E")}
+#theme{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20z' fill='black'/%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E")}
+
+/* shell */
+.shell{display:grid;grid-template-columns:252px minmax(0,1fr);gap:20px;max-width:1600px;margin:0 auto;padding-inline:16px}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 78px);align-self:start;margin-top:16px;border:1px solid var(--glass-line);border-radius:var(--r-xl);padding:12px;box-shadow:var(--shadow)}
+.hismods{display:grid;gap:4px}
+.navlabel{margin:10px 12px 4px;font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.navlabel:first-child{margin-top:4px}
+:root[lang="ar"] .navlabel{letter-spacing:0;text-transform:none;font-size:13px}
+.hismods button{display:flex;align-items:center;gap:12px;min-height:46px;width:100%;padding:0 12px;border:0;border-radius:var(--r-md);background:transparent;color:var(--ink);font-weight:500;text-align:start}
+.hismods button:hover{background:var(--inset)}
+.hismods button.on{background:var(--pri-soft);color:var(--pri-ink);font-weight:700}
+.hismods button.on .ic{stroke-width:2.2}
+.maincol{min-width:0}
+.scrim{display:none}
+
+/* scope bar (clinic, role, week, capacity, simulated date) */
+.pt{margin-top:16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:10px 16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);font-size:14px;color:var(--muted)}
+.pt b{color:var(--ink);font-weight:600}
+.ptl{display:flex;align-items:center;gap:8px}
+.pt select,.pt input{min-height:44px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--inset);color:var(--ink);padding:0 10px;font-size:14px}
+.pt input[type=number]{width:72px}
+#weekPill{padding:6px 12px;border-radius:999px;background:var(--inset);color:var(--ink);font-weight:500}
+.pt .synth{margin-inline-start:auto;padding:6px 12px;border-radius:999px;background:var(--warn-soft);color:var(--warn);font-weight:700;font-size:13px}
+
+/* page header */
+.wrap{padding-block:22px 48px}
+.titlebar{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:14px 24px;margin-bottom:18px}
+.titlebar>div{flex:1 1 480px;min-width:0}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;color:var(--pri-ink);letter-spacing:.06em;text-transform:uppercase}
+:root[lang="ar"] .eyebrow{letter-spacing:0;text-transform:none}
+.titlebar h1{margin:0 0 6px;font-size:1.55rem;line-height:1.25;font-weight:700;letter-spacing:-.01em}
+.titlebar p{margin:0;max-width:78ch;color:var(--muted);font-size:14.5px}
+.titlebar .notice{flex:0 1 340px}
+
+/* view tabs + walkthrough */
+.mod{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.viewtabs{display:flex;flex-wrap:wrap;gap:4px;padding:4px;background:var(--inset);border:1px solid var(--line2);border-radius:var(--r-md)}
+.viewtabs button{min-height:44px;padding:0 16px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--muted);font-weight:600;font-size:14px}
+.viewtabs button:hover{color:var(--ink)}
+.viewtabs button[aria-selected="true"]{background:var(--panel);color:var(--pri-ink);font-weight:700;box-shadow:0 1px 3px rgba(15,42,44,.12)}
+.wtb{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1.5px dashed var(--pri-line);border-radius:var(--r-md);background:transparent;color:var(--pri-ink);font-weight:700;font-size:14px}
+.wtb::before{content:"";width:18px;height:18px;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='4' width='14' height='17' rx='2'/%3E%3Cpath d='M9 4V3h6v1M9 13l2 2 4-4'/%3E%3C/svg%3E")}
+.wtb:hover{background:var(--pri-soft);border-style:solid}
+
+/* views */
+.lead{display:none}.lead.on{display:block}
+.grid.off{display:none}
+
+/* stat tiles */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.kpi{display:flex;flex-direction:column;gap:2px;padding:16px 18px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);min-width:0}
+.kpi .l{font-size:13px;color:var(--muted)}
+.kpi .l:first-child{font-size:13.5px;font-weight:600;color:var(--ink)}
+.kpi .v{margin:4px 0 2px;font-size:1.85rem;line-height:1.15;font-weight:700;color:var(--pri-ink);letter-spacing:-.01em}
+.kpi .v.bad{color:var(--bad)}.kpi .v.ok{color:var(--good)}
+.kpi .v.bad::after,.kpi .v.ok::after{display:inline-block;vertical-align:middle;margin-inline-start:10px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:700;letter-spacing:0}
+.kpi .v.bad::after{content:"✕ off target";background:var(--bad-soft);color:var(--bad)}
+.kpi .v.ok::after{content:"✓ on target";background:var(--good-soft);color:var(--good)}
+[lang="ar"] .kpi .v.bad::after{content:"✕ خارج الهدف"}[lang="ar"] .kpi .v.ok::after{content:"✓ ضمن الهدف"}
+
+/* cards */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden;min-width:0}
+.ph{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:14px 18px;border-bottom:1px solid var(--line2);font-size:1.02rem;font-weight:700}
+.ph small{font-size:13px;font-weight:500;color:var(--muted)}
+.rep2{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+.chart svg{width:100%;height:auto;display:block}
+.hint{font-size:13px;color:var(--muted)}
+.tip{border-bottom:1px dotted var(--muted);cursor:help}
+.empty{padding:28px 18px;text-align:center;color:var(--muted);font-size:14px}
+.notice{display:block;padding:10px 14px;border-radius:var(--r-md);background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--warn);font-size:13.5px;font-weight:500}
+.linkbtn{background:none;border:0;padding:0;color:var(--pri-ink);font-weight:600;font-size:inherit;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.linkbtn:hover{text-decoration-thickness:2px}
+
+/* tables */
+table.lt{width:100%;border-collapse:collapse;font-size:14px}
+table.lt th{padding:10px 14px;text-align:start;font-size:13px;font-weight:600;color:var(--muted);background:var(--inset);border-bottom:1px solid var(--line2);white-space:nowrap}
+table.lt td{padding:11px 14px;border-bottom:1px solid var(--line2);vertical-align:middle}
+table.lt tbody tr:last-child td{border-bottom:0}
+table.lt tbody tr:hover td{background:color-mix(in srgb,var(--inset) 60%,transparent)}
+tr.wkrow td{background:var(--inset)!important;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+[lang="ar"] tr.wkrow td{text-transform:none;letter-spacing:0}
+
+/* status chips: word + colour */
+.st{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700;line-height:1.5;white-space:nowrap;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.st.todo{background:var(--pri-soft);border-color:var(--pri-line);color:var(--pri-ink)}
+.st.overdue{background:var(--bad-soft);border-color:var(--bad-line);color:var(--bad)}
+.st.done{background:var(--good-soft);border-color:var(--good-line);color:var(--good)}
+.st.callback{background:var(--warn-soft);border-color:var(--warn-line);color:var(--warn)}
+.st.outstanding,.st.nodata{background:var(--inset);border-color:var(--line);color:var(--muted)}
+.sbadge{display:inline-grid;place-items:center;min-width:28px;height:28px;padding:0 6px;border-radius:999px;background:var(--bad-soft);border:1px solid var(--bad-line);color:var(--bad);font-weight:700;font-size:13px}
+
+/* worklist: hero, list, detail */
+.grid{display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px;align-items:start}
+.hero{grid-column:1/-1;position:relative;overflow:hidden;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px 28px;padding:22px 24px;border-radius:var(--r-xl);color:#fff;background:linear-gradient(135deg,var(--hero1),var(--hero2));box-shadow:var(--shadow)}
+.hero::before{content:"";position:absolute;inset:-40% -10% auto auto;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 65%);pointer-events:none}
+[dir="rtl"] .hero::before{inset:-40% auto auto -10%}
+.hero-main{position:relative;flex:1 1 380px;min-width:0}
+.hero .pop{display:inline-block;padding:3px 12px;border-radius:999px;background:var(--pop);color:var(--on-pop);font-size:13px;font-weight:700}
+.hero h2{margin:10px 0 6px;font-size:1.4rem;font-weight:700;line-height:1.3;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.hero-meta{margin:0 0 4px;color:rgba(255,255,255,.9);font-size:14px}
+.hero-meta b{color:#fff}
+.hero .btn.light{margin-top:14px;background:#fff;border-color:#fff;color:#0a5052}
+.hero .btn.light:hover{background:#eafaf8}
+.hero-stats{position:relative;display:grid;grid-template-columns:repeat(4,minmax(78px,1fr));gap:10px;flex:0 1 440px}
+.hs{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 8px;border-radius:var(--r-md);background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);text-align:center}
+.hs b{font-size:1.6rem;line-height:1.1;font-weight:700}
+.hs span{font-size:13px;color:rgba(255,255,255,.88)}
+.list{max-height:72vh;overflow:auto;overscroll-behavior:contain}
+.wk{position:sticky;top:0;z-index:1;padding:8px 18px;font-size:13px;font-weight:700;color:var(--muted);background:var(--inset);border-bottom:1px solid var(--line2);letter-spacing:.04em;text-transform:uppercase}
+[lang="ar"] .wk{letter-spacing:0;text-transform:none}
+.row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:66px;padding:10px 16px;border-bottom:1px solid var(--line2);border-inline-start:4px solid transparent;cursor:pointer}
+.row:hover{background:var(--inset)}
+.row.sel{background:var(--pri-soft);border-inline-start-color:var(--pri)}
+.row .sc{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:15px;background:var(--inset);color:var(--muted);border:1px solid var(--line)}
+.row.high .sc{background:var(--bad-soft);color:var(--bad);border-color:var(--bad-line)}
+.row .nm{font-weight:700}
+.row .mt{font-size:13px;color:var(--muted)}
+.row.outstanding .nm,.row.outstanding .sc,.row.nodata .nm,.row.nodata .sc{opacity:.75}
+.listfoot{padding:12px 18px;font-size:13px;color:var(--muted);border-top:1px solid var(--line2);background:var(--inset)}
+.detail{padding:20px 22px}
+.banner{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 20px;padding-bottom:16px;border-bottom:1px solid var(--line2)}
+.banner>div:first-child{flex:1 1 300px;min-width:0}
+.banner h2{margin:0 0 4px;font-size:1.3rem;font-weight:700}
+.banner .meta{font-size:14px;color:var(--muted);line-height:1.8}
+.banner .ids{font-size:13px;color:var(--muted);text-align:end;line-height:1.8}
+.banner .ids b{color:var(--ink)}
+.section{margin-top:18px}
+.section h3{margin:0 0 10px;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+[lang="ar"] .section h3{letter-spacing:0;text-transform:none;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:999px;font-size:13.5px;background:var(--pri-soft);color:var(--ink);border:1px solid var(--pri-line)}
+.chip b{color:var(--pri-ink)}
+.chip.zero{background:transparent;border-style:dashed;border-color:var(--line);color:var(--muted)}
+.chip.zero b{color:var(--muted)}
+.suggest{padding:16px 18px;border-radius:var(--r-lg);border:1.5px solid var(--pri-line);background:linear-gradient(135deg,var(--pri-soft),color-mix(in srgb,var(--pri-soft) 45%,var(--panel)))}
+.suggest .lab{font-size:13px;font-weight:700;color:var(--pri-ink);letter-spacing:.05em;text-transform:uppercase}
+[lang="ar"] .suggest .lab{letter-spacing:0;text-transform:none}
+.suggest .ttl{margin:4px 0;font-size:1.15rem;font-weight:700}
+.suggest .why{font-size:14px}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+
+/* buttons: one filled primary, outline secondary, quiet ghost */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:12px;border:1.5px solid var(--pri);background:var(--panel);color:var(--pri-ink);font-weight:700;font-size:14px;line-height:1.2;transition:background-color .15s,box-shadow .15s,transform .1s}
+.btn:hover{background:var(--pri-soft)}
+.btn:active{transform:translateY(1px)}
+.btn.primary,.btn.save{background:var(--pri);border-color:var(--pri);color:var(--on-pri)}
+.btn.primary:hover,.btn.save:hover{background:var(--pri-ink);border-color:var(--pri-ink)}
+.btn.save{min-width:140px}
+.btn.ghost{border-color:var(--line);border-width:1px;color:var(--ink);background:var(--panel)}
+.btn.ghost:hover{background:var(--inset)}
+.btn.mini{padding:0 12px;font-size:13.5px}
+.btn.pressed{box-shadow:0 0 0 3px var(--pri-line)}
+.btn:disabled,.btn:disabled:hover{background:transparent;border:1.5px dashed var(--line);color:var(--muted);cursor:not-allowed;transform:none}
+
+/* outreach form */
+.override{display:none;margin-top:12px;padding:12px 14px;border:1.5px dashed var(--pri-line);border-radius:var(--r-md);background:var(--panel)}
+.override.open{display:block}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 14px}
+.fg{display:grid;gap:5px;align-content:start;min-width:0}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:13.5px;font-weight:600;color:var(--ink)}
+.fg select,.fg input,.fg textarea,.inl{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);color:var(--ink);font-size:14px}
+.fg textarea{padding:10px 12px}
+.fg select:hover,.fg input:hover,.inl:hover{border-color:var(--pri-line)}
+.tmpl{margin-top:4px;padding:12px 14px;border-radius:var(--r-md);background:var(--inset);border:1px solid var(--line2);font-size:14px;white-space:pre-wrap}
+.tmpl .lab{margin-bottom:4px;font-size:13px;font-weight:600;color:var(--muted)}
+.saverow{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px}
+.confirm{flex:1;min-width:240px;display:none;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--r-md);font-size:14px}
+.confirm.ok{display:flex;background:var(--good-soft);border:1px solid var(--good-line);color:var(--good)}
+.confirm.warn{display:flex;background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--warn)}
+.confirm button{margin-inline-start:auto}
+
+/* outreach log */
+.log{margin-top:16px}
+.logrow{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,2.2fr) auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line2);font-size:14px}
+.logrow:last-child{border-bottom:0}
+.logrow .t{font-size:13px;color:var(--muted);white-space:nowrap}
+.logrow.undone{color:var(--muted);text-decoration:line-through}
+
+/* HIS module toolbars */
+.tb{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.inl{width:auto}
+.inl.num{width:110px}
+
+/* walkthrough panel (glass, floating) */
+.wt{position:fixed;inset-inline-end:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:25;width:380px;max-width:calc(100vw - 32px);max-height:calc(100vh - 110px);overflow:auto;display:none;border:1px solid var(--glass-line);border-radius:var(--r-xl);box-shadow:var(--shadow-pop)}
+.wt.on{display:block}
+.wt .h{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 6px 6px 16px;background:linear-gradient(135deg,var(--hero1),var(--hero2));color:#fff;font-weight:700;font-size:14px}
+[dir="rtl"] .wt .h{padding:6px 16px 6px 6px}
+.wt .h button{width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#fff;font-size:22px;line-height:1}
+.wt .h button:hover{background:rgba(255,255,255,.16)}
+.wt .b{padding:14px 16px 16px;font-size:14px}
+.wt .step{font-size:13px;font-weight:700;color:var(--pri-ink);letter-spacing:.05em;text-transform:uppercase}
+[lang="ar"] .wt .step{letter-spacing:0;text-transform:none}
+.wt .task{margin:2px 0 4px;font-size:1.05rem;font-weight:700}
+.wt .q{display:grid;gap:6px;padding:10px 0;border-top:1px solid var(--line2)}
+.wt .q .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.wt .q .opts button{min-height:44px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);color:var(--ink);font-size:13.5px;font-weight:600}
+.wt .q .opts button.y{background:var(--good-soft);border-color:var(--good-line);color:var(--good)}
+.wt .q .opts button.w{background:var(--warn-soft);border-color:var(--warn-line);color:var(--warn)}
+.wt .q .opts button.n{background:var(--bad-soft);border-color:var(--bad-line);color:var(--bad)}
+.wt textarea{width:100%;margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);color:var(--ink);font-size:14px}
+.wt .f{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.wt .fg input{min-height:44px}
+
+/* toast */
+.toast{position:fixed;inset-inline-end:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;max-width:min(440px,calc(100vw - 32px));padding:12px 16px;border-radius:var(--r-md);background:var(--toast);color:var(--on-toast);font-size:14px;font-weight:500;box-shadow:var(--shadow-pop);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+
+/* Arabic: user-facing mixed text keeps its own direction */
+[dir=rtl] .chip,[dir=rtl] .st,[dir=rtl] .row .mt,[dir=rtl] .banner .meta,[dir=rtl] .ids,[dir=rtl] .logrow,[dir=rtl] .pt span{unicode-bidi:plaintext}
+
+/* tablet: one worklist column */
+@media (max-width:1079px){
+ .grid,.rep2{grid-template-columns:minmax(0,1fr)}
+ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .list{max-height:48vh}
+}
+/* phone: drawer menu, stacked bars, tables become cards */
+@media (max-width:759px){
+ .shell{display:block}
+ .iconbtn{display:grid}
+ .brand{font-size:15px}
+ .brand .mark{width:30px;height:30px}
+ .topbar{gap:8px}
+ .pillb{padding:0 12px;font-size:13.5px}
+ #lang::before{display:none}
+ #theme{width:44px;padding:0;justify-content:center;font-size:0;gap:0}
+ #theme::before{width:20px;height:20px}
+ .side{position:fixed;top:0;bottom:0;align-self:normal;inset-inline-start:0;z-index:35;width:min(300px,86vw);margin:0;padding:calc(16px + env(safe-area-inset-top,0px)) 12px 16px;border-radius:0;border:0;border-inline-end:1px solid var(--glass-line);background:var(--panel);overflow:auto;transform:translateX(-105%);visibility:hidden;transition:transform .22s ease,visibility 0s .22s}
+ [dir="rtl"] .side{transform:translateX(105%)}
+ body.nav-open .side{transform:none;visibility:visible;transition:transform .22s ease}
+ body.nav-open .scrim{display:block;position:fixed;inset:0;z-index:34;background:rgba(6,20,22,.42)}
+ .pt{gap:10px 14px;padding:10px 14px}
+ .pt .synth{margin-inline-start:0}
+ .wrap{padding-block:18px 40px}
+ .titlebar h1{font-size:1.35rem}
+ .titlebar .notice{flex-basis:100%}
+ .mod{align-items:stretch}
+ .viewtabs{width:100%;display:grid;grid-template-columns:1fr 1fr}
+ .viewtabs button{padding:0 10px}
+ .wtb{width:100%;justify-content:center}
+ .hero{padding:18px}
+ .hero-stats{flex-basis:100%;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+ .hs{padding:10px 4px}
+ .hs b{font-size:1.35rem}
+ .hs span{font-size:13px}
+ .hero .btn.light{width:100%}
+ .detail{padding:16px}
+ .banner .ids{text-align:start}
+ .btnrow .btn{flex:1 1 200px}
+ .saverow .btn{flex:1 1 100%}
+ .logrow{grid-template-columns:minmax(0,1fr);gap:4px}
+ .kpi{padding:14px}
+ .kpi .v{font-size:1.5rem}
+ .kpi .v.bad::after,.kpi .v.ok::after{display:block;width:max-content;margin:6px 0 0}
+ table.lt.cards thead{display:none}
+ table.lt.cards,table.lt.cards tbody,table.lt.cards tr,table.lt.cards td{display:block;width:100%}
+ table.lt.cards tr{padding:10px 16px;border-bottom:1px solid var(--line2)}
+ table.lt.cards tr:last-child{border-bottom:0}
+ table.lt.cards td{display:grid;grid-template-columns:minmax(92px,36%) minmax(0,1fr);gap:10px;align-items:center;padding:4px 0;border:0;text-align:start!important;overflow-wrap:anywhere}
+ table.lt.cards td::before{content:attr(data-label);font-size:13px;font-weight:600;color:var(--muted)}
+ table.lt.cards td:not([data-label])::before{content:none}
+ table.lt.cards td:not([data-label]){display:block}
+ table.lt.cards tr.wkrow{padding:0;border:0}
+ table.lt.cards tr.wkrow td{padding:8px 16px}
+ table.lt.cards tbody tr:hover td{background:transparent}
+ table.lt.cards .tb{gap:6px}
+ table.lt.cards .inl{flex:1 1 140px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+
+/* v4 additions: retry status, business-case tab, reset button */
+.st.retry{background:var(--warn-soft);border-color:var(--warn-line);color:var(--warn)}
+.bzgrid{display:grid;grid-template-columns:minmax(300px,1fr) minmax(320px,1.3fr);gap:14px;margin-bottom:14px}
+@media(max-width:900px){.bzgrid{grid-template-columns:1fr}}
+.sl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:8px 14px;font-size:13px;align-items:center}
+.sl input[type=range]{grid-column:1/3;width:100%}
+.sl b{text-align:end}
+.bzseg{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.bzseg .btn.on{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
+.bzk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+@media(max-width:700px){.bzk{grid-template-columns:1fr 1fr}}
+.sl input[type=range],.bzseg input{accent-color:var(--pri)}
+.resetb{padding:3px 12px;font-size:12px;font-weight:600;min-height:32px}
+.bzk .kpi .v::after,.bzk .kpi .v::before{display:none!important;content:none!important}
+</style>
+
+</head>
+<body>
+<div class="bgfx" aria-hidden="true"></div>
+<a class="skip" href="#main" data-i18n>Skip to content</a>
+<header class="topbar" role="banner">
+ <button class="iconbtn" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="side"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+ <span class="brand"><span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></span><b>MediCore HIS</b></span>
+ <span class="sp"></span>
+ <button class="pillb" id="lang" aria-label="Switch language">AR</button><button class="pillb" id="theme" aria-label="Toggle light or dark theme" data-i18n>Theme</button>
+</header>
+<div class="shell">
+ <aside class="side" id="side">
+  <nav class="hismods" aria-label="HIS modules">
+   <p class="navlabel" data-i18n>Clinical modules</p>
+   <button data-h="Patients"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span data-i18n>Patients</span></button><button data-h="Scheduling"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span data-i18n>Scheduling</span></button><button data-h="Orders"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3M7.4 15h9.2"/></svg><span data-i18n>Orders</span></button><button data-h="Results"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><span data-i18n>Results</span></button>
+   <p class="navlabel" data-i18n>Care coordination</p>
+   <button data-h="AB" class="on ab" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19h18M5 19v-5M19 19v-5M3 14c3-6 15-6 18 0M12 10v9"/></svg><span>AccessBridge</span></button><button data-h="Reports"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-9M12 20V5M19 20v-6M3 20h18"/></svg><span data-i18n>Reports</span></button>
+  </nav>
+ </aside>
+ <div class="maincol">
+<div class="pt">
+ <span><b data-i18n>Clinic:</b> <span data-i18n>Diabetes outpatient (simulated)</span></span>
+ <label class="ptl"><b data-i18n>Role:</b> <select id="role" aria-label="Role"><option value="c" data-i18n>Coordinator</option><option value="l" data-i18n>Lead coordinator</option><option value="q" data-i18n>Quality lead</option></select></label>
+ <span id="weekPill" data-i18n>Lists for 1–12 Nov 2026 · built Thu 29 Oct</span>
+ <label class="ptl"><b data-i18n>Capacity/week</b> <input type="number" id="cap" value="6" min="1" max="20" aria-label="Weekly capacity"></label>
+ <label class="ptl"><b data-i18n>Today</b> <input type="date" id="today" value="2026-10-29" min="2026-10-29" max="2026-11-12" aria-label="Simulated date"></label>
+ <span class="synth" data-i18n>Synthetic data · prototype</span><button class="btn ghost resetb" id="resetDemo" data-i18n>Reset demo</button>
+</div>
+ <main class="wrap" id="main" tabindex="-1">
+ <div class="titlebar"><div id="titleWork"><p class="eyebrow" data-i18n>Care coordination</p><h1 data-i18n>One screen: the list, the reason, the suggested action and the log</h1><p data-i18n>Contact the flagged patients before the visit, then log the action, the outcome and the barrier in one step. The score sorts the list; the coordinator decides.</p></div><div id="titleBiz" style="display:none"><p class="eyebrow" data-i18n>Care coordination</p><h1 data-i18n>Business case: what the module costs and returns inside the HIS</h1><p data-i18n>The same 36-month model as the financial workbook. Change an input and watch the break-even move. The inputs marked unvalidated are assumptions to confirm at a pilot site.</p></div><div id="titleLead" style="display:none"><p class="eyebrow" data-i18n>Care coordination</p><h1 data-i18n>Lead view: deadlines, capacity and barriers</h1><p data-i18n>What the coordinator lead sees each week: who is overdue, who waits beyond capacity, and whether logging stays under 30 seconds.</p></div><div id="titleProject" style="display:none"><p class="eyebrow" data-i18n>Care coordination</p><h1 data-i18n>AccessBridge: care before the missed visit</h1><p data-i18n>What the project is, how the score works, the safeguards, the decision register and the presenter script. The working screens are in the other tabs.</p></div><div id="titleHis" style="display:none"><p class="eyebrow" data-i18n>Clinical modules</p><h1 id="hisH1"></h1><p id="hisP"></p></div><div id="titleReport" style="display:none"><p class="eyebrow" data-i18n>Care coordination</p><h1 data-i18n>Monthly report: high-risk no-show P-chart and subgroup table</h1><p data-i18n>Built from the weekly extract and the outreach log without manual counting. Owned by the clinic quality lead; the Equity Steward reviews the subgroup table.</p></div><span class="notice" data-i18n>Synthetic patients. Not a live system. Not for clinical use. No patient data leaves this page.</span></div>
+ <div class="mod"><div class="viewtabs" role="tablist" aria-label="AccessBridge views"><button role="tab" aria-selected="false" data-v="project" data-i18n>Project</button><button role="tab" aria-selected="true" data-v="work" data-i18n>Coordinator worklist</button><button role="tab" aria-selected="false" data-v="lead" data-i18n>Lead view</button><button role="tab" aria-selected="false" data-v="report" data-i18n>Monthly report</button><button role="tab" aria-selected="false" data-v="biz" data-i18n>Business case</button></div><button class="wtb" id="wtBtn" data-i18n>Walkthrough</button></div>
+ <section class="lead" id="project">
+ <div class="kpis">
+  <div class="kpi"><div class="l" data-i18n>Historical no-show rate</div><div class="v">21.4%</div><div class="l" data-i18n>705 / 3,298 synthetic attended-or-no-show visits</div></div>
+  <div class="kpi"><div class="l" data-i18n>High-risk no-show rate</div><div class="v bad">39.5%</div><div class="l" data-i18n>Rule score ≥4 · coordinator review</div></div>
+  <div class="kpi"><div class="l" data-i18n>Median first outreach</div><div class="v">4 <span data-i18n>days</span></div><div class="l" data-i18n>After a missed visit · synthetic baseline</div></div>
+  <div class="kpi"><div class="l" data-i18n>High-risk sensitivity</div><div class="v">30.5%</div><div class="l" data-i18n>AUC 0.66 · modest, transparent rule</div></div>
+ </div>
+ <section class="panel" style="margin-bottom:12px"><div class="ph"><span data-i18n>From signal to meaningful follow-up</span><small data-i18n>Three MVP features</small></div>
+  <table class="lt"><thead><tr><th data-i18n>Step</th><th data-i18n>Feature</th><th data-i18n>What happens</th></tr></thead><tbody>
+  <tr><td>01 · <span data-i18n>IDENTIFY</span></td><td data-i18n>Weekly worklist</td><td data-i18n>Transparent attendance-risk score and visible contributing factors.</td></tr>
+  <tr><td>02 · <span data-i18n>REVIEW</span></td><td data-i18n>Verify the barrier</td><td data-i18n>Potential access signal is checked with the patient; never assumed.</td></tr>
+  <tr><td>03 · <span data-i18n>ACT</span></td><td data-i18n>Choose outreach</td><td data-i18n>Coordinator selects an appropriate action; consent rules apply.</td></tr>
+  <tr><td>04 · <span data-i18n>RECORD</span></td><td data-i18n>One-click outcome log</td><td data-i18n>Action, outcome and patient-reported barrier are structured.</td></tr>
+  <tr><td>05 · <span data-i18n>LEARN</span></td><td data-i18n>Quality intelligence view</td><td data-i18n>Monthly monitoring supports process review and subgroup audit.</td></tr>
+  </tbody></table></section>
+ <div class="rep2">
+  <section class="panel"><div class="ph"><span data-i18n>Risk score · transparent rules</span><small data-i18n>Deterministic</small></div><table class="lt"><tbody>
+   <tr><td data-i18n>Prior no-shows = 0 / 1 / 2 / ≥3</td><td style="text-align:end"><b data-i18n>0 / 2 / 4 / 6 pts</b></td></tr>
+   <tr><td data-i18n>Residence 60+ km</td><td style="text-align:end"><b data-i18n>+1 pt</b></td></tr>
+   <tr><td data-i18n>No reminder consent OR no mobile on file</td><td style="text-align:end"><b data-i18n>+1 pt</b></td></tr>
+   <tr><td data-i18n>Booked ≥90 days ahead</td><td style="text-align:end"><b data-i18n>+1 pt</b></td></tr>
+   <tr><td data-i18n>High / Medium / Low</td><td style="text-align:end"><b data-i18n>≥4 / 2–3 / 0–1</b></td></tr></tbody></table>
+   <div class="hint" style="padding:8px 12px" data-i18n>Payer, nationality, language, sex and age are not score inputs. They are retained for subgroup equity audit.</div></section>
+  <section class="panel"><div class="ph"><span data-i18n>Human oversight & safe handling</span><small data-i18n>Human-in-the-loop</small></div>
+   <ul style="margin:0;padding:10px 28px;font-size:12px;display:grid;gap:7px">
+    <li data-i18n>Risk score prioritises outreach only; it never removes a patient from care or routine reminders.</li>
+    <li data-i18n>A patient who says no to data use stays visible as “No data consent”. AccessBridge does not score or contact the patient; the routine clinic reminder continues.</li>
+    <li data-i18n>Potential barriers are signals, not facts. Confirm with the patient before selecting a response.</li>
+    <li data-i18n>Do not suggest SMS/WhatsApp when consent is absent; do not suggest phone outreach if no usable number is available without first verifying contact details.</li>
+    <li data-i18n>Record coordinator action, outcome and patient-reported barrier; preserve an auditable history in a real system.</li>
+    <li data-i18n>Capacity limits must be agreed with the clinic; patients beyond capacity remain visible and are not silently discarded.</li>
+    <li data-i18n>Monitor subgroup sensitivity and no-show disparities; review the rule if patient mix or data quality changes.</li></ul></section>
+ </div>
+ <section class="panel" style="margin-top:12px"><div class="ph"><span data-i18n>Patient consent · two separate parts</span><span style="display:flex;gap:8px;align-items:center"><small data-i18n>Draft for ethics review</small><button class="btn ghost" id="printConsent" style="padding:3px 9px;font-size:11.5px;font-weight:600" data-i18n>Print consent form (English + Arabic)</button></span></div>
+  <table class="lt"><thead><tr><th data-i18n>Part</th><th data-i18n>The patient agrees that</th><th data-i18n>If the patient says no</th></tr></thead><tbody>
+  <tr><td><b data-i18n>A · Data use</b></td><td data-i18n>The clinic stores and uses the patient's appointment and contact data in AccessBridge, an online system inside the hospital network, to plan outreach and to check quality and fairness.</td><td data-i18n>The patient stays visible as “No data consent”. No score and no outreach. The routine clinic reminder continues. Care does not change.</td></tr>
+  <tr><td><b data-i18n>B · SMS / WhatsApp reminders</b></td><td data-i18n>The clinic sends visit reminders by SMS or WhatsApp to the patient's mobile number.</td><td data-i18n>No messages. The coordinator can phone the patient or send a letter.</td></tr>
+  </tbody></table>
+  <div class="hint" style="padding:8px 12px" data-i18n>The patient can agree to Part A and refuse Part B. The patient can withdraw either part at any time. The hospital data protection officer and the ethics committee must review the wording (Egypt, Law No. 151 of 2020).</div></section>
+ <section class="panel" style="margin-top:12px"><div class="ph"><span data-i18n>Project decision register</span><small data-i18n>Current working position</small></div>
+  <table class="lt"><thead><tr><th data-i18n>Decision</th><th data-i18n>Working position</th><th data-i18n>Status</th></tr></thead><tbody>
+  <tr><td data-i18n>Project setting</td><td data-i18n>Simulated MENA hospital outpatient diabetes clinic, Sunday–Thursday</td><td><span class="st done" data-i18n>Adopt</span></td></tr>
+  <tr><td data-i18n>Late cancellation</td><td data-i18n>Patient-initiated cancellation / reschedule ≤1 day; separate balancing measure, not a no-show</td><td><span class="st done" data-i18n>Adopt</span></td></tr>
+  <tr><td data-i18n>Risk threshold</td><td data-i18n>Rule-based score; High ≥4 for Version 1</td><td><span class="st callback" data-i18n>Provisional</span></td></tr>
+  <tr><td data-i18n>Weekly capacity</td><td data-i18n>Approximately six high-risk patients estimated from synthetic analysis; validate with coordinator</td><td><span class="st callback" data-i18n>Provisional</span></td></tr>
+  <tr><td data-i18n>Six-month high-risk target</td><td data-i18n>39.5% synthetic baseline → ≤31.6% (20% relative reduction); measure the real baseline before the pilot</td><td><span class="st callback" data-i18n>Provisional</span></td></tr>
+  <tr><td data-i18n>Lower threshold for other-language / remote patients</td><td data-i18n>Compare threshold 3 against threshold 4; do not automatically adopt</td><td><span class="st todo" data-i18n>Test first</span></td></tr>
+  <tr><td data-i18n>Governance roles</td><td data-i18n>Equity Steward and Clinic Quality Lead; separate ownership preferred</td><td><span class="st outstanding" data-i18n>Assign owners</span></td></tr>
+  <tr><td data-i18n>Patient data consent</td><td data-i18n>Two separate consents: data use in AccessBridge (Part A) and SMS/WhatsApp reminders (Part B); form drafted for ethics review</td><td><span class="st callback" data-i18n>Provisional</span></td></tr>
+  <tr><td data-i18n>Reminder consent as a score input</td><td data-i18n>Kept in Version 1 (+1 point); decide whether it should be a channel rule only (go-online plan, decision 5)</td><td><span class="st todo" data-i18n>Test first</span></td></tr>
+  </tbody></table></section>
+ <div class="rep2" style="margin-top:12px">
+  <section class="panel"><div class="ph"><span data-i18n>Version 1 scope discipline</span><small>MVP</small></div><table class="lt"><tbody>
+   <tr><td data-i18n>Weekly prioritised worklist</td><td style="text-align:end"><span class="st done" data-i18n>Included</span></td></tr>
+   <tr><td data-i18n>Barrier-matched outreach suggestion</td><td style="text-align:end"><span class="st done" data-i18n>Included</span></td></tr>
+   <tr><td data-i18n>One-click structured outcome log</td><td style="text-align:end"><span class="st done" data-i18n>Included</span></td></tr>
+   <tr><td data-i18n>Machine-learning model</td><td style="text-align:end"><span class="st outstanding" data-i18n>Excluded</span></td></tr>
+   <tr><td data-i18n>Patient-facing application</td><td style="text-align:end"><span class="st outstanding" data-i18n>Excluded</span></td></tr>
+   <tr><td data-i18n>Transport-booking integration</td><td style="text-align:end"><span class="st outstanding" data-i18n>Excluded</span></td></tr>
+   <tr><td data-i18n>Automated clinical decisions</td><td style="text-align:end"><span class="st outstanding" data-i18n>Excluded</span></td></tr></tbody></table></section>
+  <section class="panel"><div class="ph"><span data-i18n>Proactive risk controls</span><small data-i18n>Proposed controls</small></div><table class="lt"><tbody>
+   <tr><td><b data-i18n>Wrong / stale appointment status</b><br><span class="hint" data-i18n>Could place a cancelled visit on the worklist</span></td><td style="text-align:end"><span class="st" data-i18n>Validate status + timestamp</span></td></tr>
+   <tr><td><b data-i18n>Barrier inferred from proxy</b><br><span class="hint" data-i18n>Could lead to inappropriate outreach</span></td><td style="text-align:end"><span class="st" data-i18n>Verify with patient</span></td></tr>
+   <tr><td><b data-i18n>Consent / contact route missing</b><br><span class="hint" data-i18n>Could cause an unauthorised reminder</span></td><td style="text-align:end"><span class="st" data-i18n>Block message action</span></td></tr>
+   <tr><td><b data-i18n>Coordinator capacity exceeded</b><br><span class="hint" data-i18n>Could leave high-priority cases unactioned</span></td><td style="text-align:end"><span class="st" data-i18n>Show queue + overdue</span></td></tr>
+   <tr><td><b data-i18n>Subgroup under-identification</b><br><span class="hint" data-i18n>Could deepen access disparities</span></td><td style="text-align:end"><span class="st" data-i18n>Audit by subgroup</span></td></tr></tbody></table></section>
+ </div>
+ <section class="panel" style="margin-top:12px"><div class="ph"><span data-i18n>Presenter's core message</span><small data-i18n>4 minutes</small></div>
+  <div style="padding:10px 12px;font-size:12.5px"><p style="margin:0 0 8px;border-inline-start:3px solid var(--blue);padding:6px 10px;background:var(--blue2)" data-i18n>“AccessBridge helps the diabetes clinic move from reactive outreach after a missed appointment to proactive, prioritised follow-up before the next visit. It combines a transparent risk worklist, barrier-aware outreach suggestions and structured outcome logging, while keeping decisions with the care coordinator.”</p>
+  <table class="lt"><tbody>
+   <tr><td>0:00–0:40</td><td data-i18n>· Explain the problem</td><td data-i18n>Project</td></tr>
+   <tr><td>0:40–1:30</td><td data-i18n>· Open a high-risk patient</td><td data-i18n>Coordinator worklist</td></tr>
+   <tr><td>1:30–2:30</td><td data-i18n>· Verify barrier and choose action</td><td data-i18n>Coordinator worklist</td></tr>
+   <tr><td>2:30–3:15</td><td data-i18n>· Save action, outcome and barrier</td><td data-i18n>Coordinator worklist</td></tr>
+   <tr><td>3:15–4:00</td><td data-i18n>· Explain measurement and equity</td><td data-i18n>Monthly report</td></tr></tbody></table>
+  <div class="notice" style="margin-top:10px;display:block" data-i18n>Not clinically validated or production-ready. The risk rule's reported AUC is 0.66 and sensitivity is 30.5% at the High cut-off. The report explicitly cautions that its synthetic data was generated using the same factors and likely overstates real-world performance. A prospective, subgroup-aware validation and workflow-capacity assessment are required before any clinical deployment.</div></div></section>
+</section>
+
+ <section class="lead" id="lead"></section>
+ <section class="lead" id="biz"></section><section class="lead" id="report"></section>
+ <section class="lead" id="his-patients"></section><section class="lead" id="his-scheduling"></section><section class="lead" id="his-orders"></section><section class="lead" id="his-results"></section>
+ <div class="grid" id="workGrid">
+  <section class="hero" id="hero" aria-label="Next to contact"></section>
+  <section class="panel" aria-label="Worklist">
+   <div class="ph"><span data-i18n>This week, sorted by score</span><small id="counts"></small></div>
+   <div class="list" id="list"></div>
+   <div class="listfoot"><span data-i18n>All eligible patients (score 4 or more) are shown. Any beyond capacity are marked Outstanding.</span> <span id="capLine"></span></div>
+  </section>
+  <section class="panel" aria-label="Patient">
+   <div class="detail" id="detail"><div class="empty" data-i18n>Select a patient to start.</div></div>
+  </section>
+ </div>
+ <section class="panel log" aria-label="Log">
+  <div class="ph"><span data-i18n>Outreach log · this list</span><span style="display:flex;gap:8px;align-items:center"><small id="logCount"></small><button class="btn ghost" id="exportLog" style="padding:3px 9px;font-size:11.5px;font-weight:600" data-i18n>Export CSV</button></span></div>
+  <div id="logRows"><div class="empty" data-i18n>No entries yet.</div></div>
+ </section>
+ </main>
+ </div>
+</div>
+<div class="scrim" id="scrim"></div>
+<aside class="wt" id="wt" aria-label="Cognitive walkthrough"><div class="h"><span id="wtTitle"></span><button id="wtClose" aria-label="Close">×</button></div><div class="b" id="wtBody"></div></aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ---------- synthetic data (same 30 records as the v2.x prototype; names are placeholders) ----------
+const R=[/* week 1 (1–5 Nov) */["DM-T2KQ2L","AP003397","2026-11-05","13:00","HbA1c review",6,4,"<10 km","Other","Y","Y",42],["DM-BH76KC","AP003343","2026-11-01","11:40","HbA1c review",4,2,"30-59 km","English","Y","Y",56],["DM-SFS8XX","AP004269","2026-11-01","15:40","Routine follow-up",4,2,"10-29 km","English","Y","Y",42],["DM-QT92N6","AP002892","2026-11-04","11:40","HbA1c review",4,2,"10-29 km","Arabic","Y","Y",38],["DM-P4SBP5","AP003615","2026-11-01","08:00","HbA1c review",3,1,"10-29 km","English","N","N",59],["DM-4EEJU6","AP000883","2026-11-01","11:40","Annual review",3,1,"60+ km","Arabic","Y","Y",54],["DM-37DNMD","AP002546","2026-11-01","09:00","HbA1c review",2,1,"<10 km","Arabic","Y","Y",56],["DM-GJ9VHQ","AP004179","2026-11-01","09:00","HbA1c review",2,1,"30-59 km","Other","Y","Y",42],["DM-USWX2S","AP000477","2026-11-01","14:20","HbA1c review",2,1,"10-29 km","Arabic","Y","Y",49],["DM-T6L3KT","AP002227","2026-11-03","09:40","Routine follow-up",2,1,"30-59 km","Arabic","Y","Y",61],["DM-JCZUL9","AP002999","2026-11-03","14:40","Routine follow-up",2,0,"60+ km","Arabic","Y","Y",93],
+/* week 2 (8–12 Nov) — additional synthetic visits */["DM-R8V2LQ","AP004410","2026-11-08","09:20","HbA1c review",7,3,"60+ km","Arabic","Y","Y",35],["DM-K3M9TA","AP004421","2026-11-09","10:00","Routine follow-up",5,2,"10-29 km","Other","N","N",48],["DM-W6P1ZD","AP004433","2026-11-10","13:40","Annual review",4,2,"<10 km","Arabic","Y","Y",40],["DM-H2C7NE","AP004447","2026-11-11","08:20","HbA1c review",4,1,"60+ km","English","Y","Y",95],["DM-Q9X4BL","AP004452","2026-11-12","11:00","HbA1c review",4,2,"30-59 km","Arabic","Y","Y",52],["DM-Z5T3MK","AP004458","2026-11-12","14:20","Routine follow-up",2,1,"<10 km","Arabic","Y","Y",60],["DM-N4F8RV","AP004461","2026-11-09","15:00","HbA1c review",4,2,"10-29 km","Arabic","Y","Y",44],["DM-E7J2WS","AP004466","2026-11-11","12:20","Annual review",5,2,"30-59 km","Other","Y","Y",91],
+/* v5: Patient 20 said no to data use (consent form Part A) */["DM-V7C3HP","AP004472","2026-11-12","15:20","HbA1c review",4,2,"10-29 km","Arabic","Y","Y",47,"N"]];
+// r[12] = data-use consent (Part A of the consent form). Missing = "Y" (agreed). r[10] = reminder consent (Part B).
+const ALL=R.map((r,i)=>({n:i+1,id:r[0],ap:r[1],date:r[2],time:r[3],type:r[4],score:r[5],prior:r[6],dist:r[7],lang:r[8],mobile:r[9],consent:r[10],lead:r[11],dc:r[12]||"Y"}));
+const noData=p=>p.dc==="N";
+// Story 1: only visits with score >= 4 appear on the list. Medium/Low patients receive routine reminders only.
+const P=ALL.filter(p=>p.score>=4); const ROUTINE=ALL.filter(p=>p.score<4).length;
+let CAP=6; const ISSUED="2026-10-29"; const weekOf=d=>d<"2026-11-08"?1:2;
+const state={sel:null,logs:[],today:"2026-10-29",lang:"en",override:false,undoTimer:null,pendingUndo:null,view:"work",openedAt:null};
+try{state.logs=JSON.parse(sessionStorage.getItem("abhis")||"[]")}catch(e){}
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const isoAdd=(d,n)=>{const t=new Date(d+"T12:00:00");t.setDate(t.getDate()+n);return t.toISOString().slice(0,10)};
+const clinicDay=d=>{const w=new Date(d+"T12:00:00").getDay();return w!==5&&w!==6};
+function addWork(d,n){let c=d,k=0;while(k<n){c=isoAdd(c,1);if(clinicDay(c))k++;}return c}
+const DOW={0:"Sun",1:"Mon",2:"Tue",3:"Wed",4:"Thu",5:"Fri",6:"Sat"};
+const fmt=d=>{const x=new Date(d+"T12:00:00");return `${t(DOW[x.getDay()])} ${x.toLocaleDateString(state.lang==="ar"?"ar-EG-u-nu-latn":"en-GB",{day:"2-digit",month:"short"})}`};
+const prevClinicDay=d=>{let c=isoAdd(d,-1);while(!clinicDay(c))c=isoAdd(c,-1);return c};
+const due=p=>{const a=addWork(ISSUED,3),b=prevClinicDay(p.date);return a<b?a:b}; // frozen at first listing (the Thursday list covers both weeks)
+const tm=l=>l.ts?new Date(l.ts).toLocaleTimeString(state.lang==="ar"?"ar-EG-u-nu-latn":"en-GB",{hour:"2-digit",minute:"2-digit"}):l.at;
+const lastLog=p=>state.logs.find(l=>l.id===p.id&&!l.undone);
+function status(p){if(noData(p))return "nodata";const l=lastLog(p);
+ if(l&&l.callback&&l.callback>state.today)return l.retry?"retry":"callback";
+ if(l&&l.callback&&l.callback<=state.today)return "todo";
+ if(l)return "done";
+ if(p.rank>CAP)return "outstanding";
+ if(state.today>due(p))return "overdue";return "todo"}
+// v5: patients with no data consent sort last in their week and do not use capacity (no rank).
+function rank(){const r={1:0,2:0};P.sort((a,b)=>weekOf(a.date)-weekOf(b.date)||noData(a)-noData(b)||b.score-a.score||a.date.localeCompare(b.date)||a.time.localeCompare(b.time)).forEach(p=>{p.week=weekOf(p.date);p.rank=noData(p)?null:++r[p.week]})}
+// number eligible patients 1..n in list order, then medium/low, then no-data-consent patients (so earlier numbers stay the same)
+rank(); {const PC=P.filter(p=>!noData(p));PC.forEach((p,i)=>p.n=i+1);const LO=ALL.filter(p=>p.score<4&&!noData(p)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));LO.forEach((p,i)=>p.n=PC.length+i+1);ALL.filter(noData).forEach((p,i)=>p.n=PC.length+LO.length+i+1)}
+function factors(p){const pts=[0,2,4,6][Math.min(p.prior,3)];return [
+ {k:`${p.prior} prior no-shows`,v:pts},{k:p.dist==="60+ km"?"Lives 60+ km":`Lives ${p.dist}`,v:p.dist==="60+ km"?1:0},
+ {k:p.mobile==="N"||p.consent==="N"?"No mobile or no reminder consent":"Mobile and consent on file",v:p.mobile==="N"||p.consent==="N"?1:0},
+ {k:`Booked ${p.lead} days ahead`,v:p.lead>=90?1:0}]}
+function suggest(p){
+ if(p.mobile==="N")return{a:"Verify contact route",why:"no mobile number on file — do not send SMS or WhatsApp; verify the contact route (the clinic nurse can phone the patient)"};
+ if(p.consent==="N")return{a:"Phone call",why:"no reminder consent — SMS and WhatsApp are not permitted"};
+ if(p.dist==="60+ km")return{a:"Offer telehealth or transport referral",why:`lives 60+ km away`};
+ if(p.prior>=2)return{a:"Phone call",why:`${p.prior} prior no-shows — ask what would help the patient attend`};
+ if(p.lead>=90)return{a:"Send reminder",why:`booked ${p.lead} days ahead`};
+ return{a:"Confirm appointment",why:"no specific barrier in the score"}}
+const ACTIONS=["Phone call","Send reminder","Offer telehealth or transport referral","Verify contact route","Confirm appointment","Letter","No action — review later"];
+const OUTCOMES=["Reached, attending","Reached, rebooked","Reached, will call back","Reached, declined","Not reached","Wrong number","Letter sent, no response","Transferred to another clinic"];
+const FAILOUT=["Not reached","Wrong number","Letter sent, no response"];
+const BARRIERS=[["Unknown / not asked",""],["No barrier reported",""],["Away or travelling","Patient is away from home or travelling on the visit date (data field: Travel)"],["No transport to clinic","Patient cannot reach the clinic (data field: Transport difficulty)"],["Cost",""],["Work or school",""],["Language or communication",""],["Forgot or unaware",""],["Illness",""],["Family responsibilities",""],["Other",""]];
+const OVERRIDE_REASONS=["Patient preference already known","Contact details updated today","Clinical judgement","Already contacted this week","Other (note)"];
+
+function renderList(){
+ const q=P; const n={todo:0,overdue:0,done:0,callback:0,retry:0,outstanding:0,nodata:0}; q.forEach(p=>n[status(p)]++);
+ let lastW=0; $("#list").innerHTML=q.map(p=>{const s=status(p);const hdr=p.week!==lastW?`<div class="wk">${t("Week")} ${p.week} · ${p.week===1?t("1–5 Nov"):t("8–12 Nov")}</div>`:"";lastW=p.week;return hdr+`<div class="row ${p.score>=4?"high":""} ${state.sel===p.id?"sel":""} ${s}" role="button" tabindex="0" data-id="${p.id}" aria-label="${t("Patient")} ${p.n}, ${noData(p)?"":t("score")+" "+p.score+", "}${t(S[s])}"><div class="sc" title="${t("Score")}">${noData(p)?"–":p.score}</div><div><div class="nm">${t("Patient")} ${p.n}</div><div class="mt">${fmt(p.date)} ${p.time}${noData(p)||p.rank<=CAP?"":" · "+t("no.")+" "+p.rank}</div></div><span class="st ${s}">${t(S[s])}</span></div>`}).join("");
+ $$("#list .row").forEach(r=>{r.addEventListener("click",()=>select(r.dataset.id));r.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(r.dataset.id)}})});
+ $("#counts").textContent=`${n.todo+n.overdue} ${t("to do")} · ${n.overdue} ${t("overdue")} · ${n.done} ${t("done")}`;
+ $("#capLine").textContent=`${t("Capacity")}: ${CAP}/${t("week")} · ${n.outstanding} ${t("outstanding")} · ${ROUTINE} ${t("medium/low patients get routine reminders")}.${n.nodata?` ${n.nodata} ${t("no data consent (routine reminder only)")}.`:""}`;renderHero(n);
+}
+const S={todo:"To do",overdue:"Overdue",done:"Done",callback:"Callback",retry:"Retry",outstanding:"Outstanding",nodata:"No data consent"};
+function select(id){state.sel=id;state.override=false;state.openedAt=Date.now();renderList();renderDetail()}
+function renderDetail(){
+ const p=P.find(x=>x.id===state.sel),box=$("#detail");if(!p){box.innerHTML=`<div class="empty">${t("Select a patient to start.")}</div>`;return}
+ if(noData(p)){box.innerHTML=`
+ <div class="banner"><div><h2>${t("Patient")} ${p.n}</h2><div class="meta">${t("Visit")} ${fmt(p.date)} ${p.time} · ${t(p.type)} · <span class="st nodata">${t(S.nodata)}</span></div></div><div class="ids"><b>${esc(p.id)}</b><br>${esc(p.ap)} · ${t("Data consent")}: ${t("no")}</div></div>
+ <div class="section"><div class="notice" style="display:block">${t("The patient said no to data use in AccessBridge (consent form, Part A). AccessBridge shows no score and no outreach for this patient. The clinic sends the routine reminder, as for every patient. Care does not change.")}</div></div>`;return}
+ const sg=suggest(p),s=status(p),l=lastLog(p);
+ box.innerHTML=`
+ <div class="banner"><div><h2>${t("Patient")} ${p.n}</h2><div class="meta">${t("Visit")} ${fmt(p.date)} ${p.time} · ${t("Score")} ${p.score} · ${t(p.type)} · <span class="st ${s}">${t(S[s])}</span>${s!=="done"&&s!=="callback"?` · ${t("Contact by")} ${fmt(due(p))}`:""}</div></div><div class="ids"><b>${esc(p.id)}</b> · <button class="linkbtn" data-chart="${p.id}">${t("Open chart")}</button><br>${esc(p.ap)} · ${t("Language")}: ${t(p.lang)}<br>${t("Mobile")}: ${p.mobile==="Y"?t("on file"):t("none")} · ${t("Reminder consent")}: ${p.consent==="Y"?t("yes"):t("no")} · ${t("Data consent")}: ${t("yes")}</div></div>
+ <div class="section"><h3>${t("Why flagged")}</h3><div class="chips">${factors(p).map(f=>`<span class="chip ${f.v?"":"zero"}">${t(f.k)} <b>(+${f.v})</b></span>`).join("")}</div></div>
+ <div class="section"><div class="suggest"><div class="lab">${t("Suggested action")}</div><div class="ttl">${t(sg.a)}</div><div class="why">${t("Reason")}: ${t(sg.why)}</div>${sg.a==="Offer telehealth or transport referral"?`<div class="why" style="margin-top:4px"><button class="linkbtn" id="teleLink">${t("Open telehealth booking (same visit type)")}</button> · <span class="hint">${t("mock link — opens the HIS telehealth slot search")}</span></div>`:""}
+  <div class="btnrow"><button class="btn primary" id="useAction">${t("Use this action")}</button><button class="btn" id="otherAction">${t("Choose another action")}</button></div>
+  <div class="override ${state.override?"open":""}" id="overrideBox"><div class="fg"><label for="ovReason">${t("Why another action? (required)")}</label><select id="ovReason"><option value="">${t("Select a reason…")}</option>${OVERRIDE_REASONS.map(x=>`<option value="${x}">${t(x)}</option>`).join("")}</select></div></div>
+ </div></div>
+ <div class="section"><h3>${t("Log the outcome")}</h3>
+  <div class="form">
+   <div class="fg"><label for="act">${t("Action")}</label><select id="act">${ACTIONS.map(a=>`<option value="${a}" ${a===sg.a?"selected":""}>${t(a)}</option>`).join("")}</select></div>
+   <div class="fg"><label for="out">${t("Outcome")}</label><select id="out"><option value="">${t("Select…")}</option>${OUTCOMES.map(o=>`<option value="${o}">${t(o)}</option>`).join("")}</select></div>
+   <div class="fg"><label for="bar">${t("Barrier")} <span class="tip" title="${t("Record what the patient said, not what the score suggests.")}">ⓘ</span></label><select id="bar">${BARRIERS.map(b=>`<option value="${b[0]}" title="${esc(t(b[1]))}">${t(b[0])}</option>`).join("")}</select></div>
+   <div class="fg" id="cbWrap" style="display:none"><label for="cb">${t("Callback date")}</label><input type="date" id="cb" min="${state.today}" max="2026-11-12"><span class="hint">${t("Patient returns to the list on this day.")}</span></div>
+   <div class="fg" id="rbWrap" style="display:none"><label for="rb">${t("New appointment date")}</label><input type="date" id="rb" min="${state.today}"><span class="hint">${t("Linked to this visit")} ${esc(p.ap)}.</span></div>
+   <div class="fg full" id="tmplWrap" style="display:none"><div class="tmpl"><div class="lab">${t("Reminder template · patient language")}: ${t(p.lang)}</div><span id="tmplText"></span></div></div>
+   <div class="fg full"><label for="note">${t("Note (optional, no identifying details)")}</label><input id="note" maxlength="140"></div>
+  </div>
+  <div class="saverow"><button class="btn save" id="save">${t("Save")}</button><div class="confirm" id="confirm"></div></div>
+  ${l?`<div class="hint" style="margin-top:8px">${t("Last entry")}: ${t(l.action)} · ${t(l.outcome)} · ${t(l.barrier)}${l.callback?` · ${t("callback")} ${fmt(l.callback)}`:""}</div>`:""}
+ </div>`;
+ $("#useAction").addEventListener("click",()=>{state.override=false;$("#overrideBox").classList.remove("open");$("#act").value=sg.a;$("#useAction").classList.add("pressed");$("#otherAction").classList.remove("pressed");$("#out").focus()});
+ $("#otherAction").addEventListener("click",()=>{state.override=true;$("#overrideBox").classList.add("open");$("#otherAction").classList.add("pressed");$("#useAction").classList.remove("pressed");$("#ovReason").focus()});
+ $("#act").addEventListener("change",()=>{if($("#act").value!==sg.a&&!state.override){state.override=true;$("#overrideBox").classList.add("open");$("#otherAction").classList.add("pressed");$("#useAction").classList.remove("pressed")}});
+ const fmtAr=d=>{const x=new Date(d+"T12:00:00");return x.toLocaleDateString("ar-EG-u-nu-latn",{weekday:"long",day:"2-digit",month:"long"})};
+ const TMPL={Arabic:`عيادة السكري — تذكير: موعدك يوم ${fmtAr(p.date)} الساعة ${p.time}. للتأكيد أو إعادة الحجز اتصل بالعيادة. (المريض ${p.n})`,English:`Diabetes clinic reminder: your visit is on ${fmt(p.date)} at ${p.time}. Reply or call the clinic to confirm or rebook. (Patient ${p.n})`,Other:`Diabetes clinic reminder: your visit is on ${fmt(p.date)} at ${p.time}. Reply or call the clinic to confirm or rebook. (Patient ${p.n}) — ${t("interpreter line available")}`};
+ const showTmpl=()=>{const on=$("#act").value==="Send reminder"&&p.mobile==="Y"&&p.consent==="Y";$("#tmplWrap").style.display=on?"":"none";if(on)$("#tmplText").textContent=TMPL[p.lang]||TMPL.English};
+ showTmpl(); $("#act").addEventListener("change",showTmpl); $("#useAction").addEventListener("click",showTmpl);
+ const tl=$("#teleLink"); if(tl)tl.addEventListener("click",()=>toast(t("Telehealth slot search would open here (not in v1).")));
+ $("#out").addEventListener("change",()=>{const v=$("#out").value;$("#cbWrap").style.display=v==="Reached, will call back"?"":"none";$("#rbWrap").style.display=v==="Reached, rebooked"?"":"none"});
+ $("#save").addEventListener("click",()=>save(p,sg));
+ if(state.pendingUndo&&state.pendingUndo.id===p.id)showConfirm(p);
+}
+function save(p,sg){
+ if(noData(p)){toast(t("No data consent: routine clinic reminder only."));return}
+ const action=$("#act").value,outcome=$("#out").value,barrier=$("#bar").value,note=$("#note").value.trim(),cb=$("#cb").value,rb=$("#rb").value;
+ if(state.logs.some(l=>l.id===p.id&&!l.undone&&l.closed)){toast(t("This case is closed and handed to the clinic lead. Undo the closing entry to change it."));return}
+ if(!outcome){toast(t("Choose an outcome first."));$("#out").focus();return}
+ if(action.startsWith("No action")&&outcome.startsWith("Reached")){toast(t("\"No action\" cannot be combined with a reached outcome. Choose the action that was taken."));$("#act").focus();return}
+ if(action==="Send reminder"&&(p.mobile==="N"||p.consent==="N")){toast(t("Reminder blocked: no mobile number or no reminder consent."));return}
+ if(action==="Phone call"&&p.mobile==="N"){toast(t("Phone call blocked: no usable number on file."));return}
+ let ovReason="";if(action!==sg.a){ovReason=$("#ovReason").value;if(!ovReason){toast(t("Choose a reason for the different action."));$("#ovReason").focus();return}}
+ if(outcome==="Reached, will call back"&&!cb){toast(t("Enter the callback date."));$("#cb").focus();return}
+ if(outcome==="Reached, rebooked"&&!rb){toast(t("Enter the new appointment date."));$("#rb").focus();return}
+ if(outcome==="Reached, will call back"&&state.logs.some(l=>l.id===p.id&&!l.undone&&l.outcome==="Reached, will call back")){toast(t("One callback return only. Choose another outcome or hand over to the clinic lead."));$("#out").focus();return}
+ if(rb&&!clinicDay(rb)){toast(t("The clinic is closed on Friday and Saturday. Choose a clinic day."));$("#rb").focus();return}
+ const secs=state.openedAt?Math.round((Date.now()-state.openedAt)/1000):null;
+ const rbId=outcome==="Reached, rebooked"?`${p.ap}-R${state.logs.filter(l=>l.linkedTo===p.ap&&l.rbId).length+1}`:"";
+ const e={id:p.id,n:p.n,rbId,action,outcome,barrier,note,ovReason,callback:outcome==="Reached, will call back"?cb:"",rebook:outcome==="Reached, rebooked"?rb:"",linkedTo:p.ap,week:p.week,dueBy:due(p),onTime:state.today<=due(p),secs,ts:Date.now(),at:new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}),undone:false};
+ if(FAILOUT.includes(outcome)){const nf=state.logs.filter(l=>l.id===p.id&&!l.undone&&l.fail).length+1;e.fail=true;e.attempt=nf;
+  const nxt=addWork(state.today,nf===1?2:5);
+  if(nf>=3){e.closed=true;e.closeWhy="3"}else if(nxt>=p.date){e.closed=true;e.closeWhy="date"}else{e.callback=nxt;e.retry=true}}
+ if(outcome==="Transferred to another clinic"){e.closed=true;e.closeWhy="transfer"}
+ const candidateLogs=[e].concat(state.logs);if(!persist(candidateLogs))return;state.logs=candidateLogs;state.override=false;
+ clearTimeout(state.undoTimer);state.pendingUndo={id:p.id,entry:e,until:Date.now()+120000};
+ state.undoTimer=setTimeout(()=>{state.pendingUndo=null;renderDetail()},120000);
+ renderList();renderDetail();renderLog();if(state.view==="lead")renderLead();
+}
+function showConfirm(p){const c=$("#confirm");const e=state.pendingUndo.entry;const secs=Math.max(0,Math.round((state.pendingUndo.until-Date.now())/1000));
+ c.className="confirm ok";c.innerHTML=`<span>✓ ${t("Saved.")} ${e.retry?t("Not reached. Retry on")+" "+fmt(e.callback)+" · "+t("attempt")+" "+e.attempt+"/3.":e.closed?t("Closed")+" · "+t(e.closeWhy==="3"?"third attempt failed, handed to the clinic lead":e.closeWhy==="transfer"?"transferred out":"visit date reached, left to the clinic lead")+".":e.callback?t("Callback set; patient returns to the list on")+" "+fmt(e.callback)+".":e.rebook?t("Rebooked for")+" "+fmt(e.rebook)+" · "+t("linked to")+" "+esc(e.linkedTo)+".":t("Moved to Done.")} ${e.secs!==null?`${t("Logged in")} ${e.secs} ${t("s")}.`:""} ${t("Undo for")} <b id="undoSecs">${Math.ceil(secs/60)}</b> ${t("min")}.</span><button class="btn ghost" id="undo">${t("Undo")}</button>`;
+ $("#undo").addEventListener("click",()=>{const candidateLogs=state.logs.map(l=>l===e?Object.assign({},l,{undone:true}):l);if(!persist(candidateLogs))return;state.logs=candidateLogs;state.pendingUndo=null;clearTimeout(state.undoTimer);renderList();renderDetail();renderLog();toast(t("Entry undone."))});
+}
+function renderLog(){const live=state.logs;$("#logCount").textContent=`${live.filter(l=>!l.undone).length} ${t("entries")}`;
+ $("#logRows").innerHTML=live.length?live.map(l=>`<div class="logrow ${l.undone?"undone":""}"><div><b>${t("Patient")} ${l.n}</b> <span class="t">${esc(l.id)}</span></div><div>${t(l.action)}${l.ovReason?` <span class="t">(${t("instead of suggestion")}: ${t(l.ovReason)})</span>`:""} · ${t(l.outcome)} · ${t("Barrier")}: ${t(l.barrier)}${l.callback?` · ${t(l.retry?"retry":"callback")} ${fmt(l.callback)}`:""}${l.closed?" · "+t("closed"):""}${l.rebook?` · ${t("rebooked")} ${fmt(l.rebook)} (${esc(l.linkedTo)})`:""}${l.note?` · ${esc(l.note)}`:""}</div><div class="t">${tm(l)}${l.secs!==null&&l.secs!==undefined?` · ${l.secs} ${t("s")}`:""}${l.undone?" · "+t("undone"):""}</div></div>`).join(""):`<div class="empty">${t("No entries yet.")}</div>`}
+// Monthly report (Should, sprint 2). Figures from the group's synthetic baseline (Sessions 2 and 5).
+const MONTHLY=[["2025-01",126,25],["2025-02",149,32],["2025-03",166,33],["2025-04",175,37],["2025-05",152,29],["2025-06",169,34],["2025-07",172,42],["2025-08",165,44],["2025-09",161,30],["2025-10",172,33],["2025-11",140,24],["2025-12",160,31],["2026-01",146,30],["2026-02",136,34],["2026-03",160,33],["2026-04",152,30],["2026-05",147,34],["2026-06",165,28],["2026-07",148,31],["2026-08",162,53],["2026-09",175,38]];
+const HIGHRISK={baseline:39.5,target:31.6};
+const SUBGROUPS=[["Payer: Self-pay",27.7],["Payer: Government",21.6],["Payer: Private",18.0],["Distance: 60+ km",27.2],["Language: Arabic",22.0],["Language: English",19.4],["Language: Other",21.5],["Nationality: National",21.5],["Nationality: Expatriate",21.1],["Sex: Female",22.7],["Sex: Male",20.1]];
+const SENS=[["Distance: 60+ km",28.4,0.56],["Language: Arabic",33.9,0.67],["Language: English",26.9,0.67],["Language: Other",19.8,0.61],["Nationality: National",32.1,0.68],["Nationality: Expatriate",27.2,0.63],["Sex: Female",33.0,0.66],["Sex: Male",27.8,0.66]];
+const CP=()=>effTheme()==="dark"?{grid:"#28454a",axis:"#9db6b6",lim:"#f2c35a",mean:"#36beb6",line:"#e2efee",dot:"#112224",out:"#ff8a80"}:{grid:"#dbe6e6",axis:"#4b6366",lim:"#a35f00",mean:"#0b6e70",line:"#0f2a2c",dot:"#ffffff",out:"#b42318"};
+function pchart(){const c=CP();
+ const W=700,H=250,L=44,R=14,T=16,B=36,iw=W-L-R,ih=H-T-B,max=40;const x=i=>L+i*(iw/(MONTHLY.length-1)),y=v=>T+(max-v)/max*ih;
+ const N=MONTHLY.reduce((a,m)=>a+m[1],0),M=MONTHLY.reduce((a,m)=>a+m[2],0),pb=M/N;
+ const lim=MONTHLY.map(m=>{const sd=Math.sqrt(pb*(1-pb)/m[1]);return{u:Math.min(max,(pb+3*sd)*100),l:Math.max(0,(pb-3*sd)*100)}});
+ let o="";[0,10,20,30,40].forEach(v=>o+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="${c.grid}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="${c.axis}">${v}%</text>`);
+ const step=k=>MONTHLY.map((m,i)=>`${i?"L":"M"}${x(i)},${y(lim[i][k])}`).join(" ");
+ o+=`<path d="${step("u")}" fill="none" stroke="${c.lim}" stroke-dasharray="4 3" stroke-width="1.2"/><path d="${step("l")}" fill="none" stroke="${c.lim}" stroke-dasharray="4 3" stroke-width="1.2"/><line x1="${L}" x2="${W-R}" y1="${y(pb*100)}" y2="${y(pb*100)}" stroke="${c.mean}" stroke-dasharray="2 4"/><text x="${L+4}" y="${y(pb*100)-4}" font-size="10" fill="${c.mean}">p̄ ${(pb*100).toFixed(1)}%</text><text x="${L+4}" y="${y(lim[0].u)-5}" text-anchor="start" font-size="10" fill="${c.lim}">${t("UCL")}</text><text x="${L+4}" y="${y(lim[0].l)+12}" text-anchor="start" font-size="10" fill="${c.lim}">${t("LCL")}</text>`;
+ o+=`<polyline points="${MONTHLY.map((m,i)=>`${x(i)},${y(m[2]/m[1]*100)}`).join(" ")}" fill="none" stroke="${c.line}" stroke-width="2"/>`;
+ MONTHLY.forEach((m,i)=>{const r=m[2]/m[1]*100,out=r>lim[i].u||r<lim[i].l;o+=`<circle cx="${x(i)}" cy="${y(r)}" r="${out?5:3}" fill="${out?c.out:c.dot}" stroke="${out?c.out:c.line}" stroke-width="1.5"><title>${m[0]}: ${r.toFixed(1)}% (${m[2]}/${m[1]})${out?" · "+t("outside control limits"):""}</title></circle>`;if(i%3===0||i===20)o+=`<text x="${x(i)}" y="${H-12}" text-anchor="${i===0?"start":i===MONTHLY.length-1?"end":"middle"}" font-size="10" fill="${c.axis}">${new Date(m[0]+"-01T12:00:00").toLocaleDateString(state.lang==="ar"?"ar-EG-u-nu-latn":"en-GB",{month:"short",year:"2-digit"})}</text>`});
+ return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${t("Monthly no-show rate P-chart with control limits")}" direction="ltr">${o}</svg>`;
+}
+function renderReport(){
+ const live=state.logs.filter(l=>!l.undone);const bars=live.filter(l=>l.barrier&&!["No barrier reported","Unknown / not asked"].includes(l.barrier)).reduce((m,l)=>(m[l.barrier]=(m[l.barrier]||0)+1,m),{});
+ const worst=Math.max(...SUBGROUPS.map(s=>s[1])),best=Math.min(...SUBGROUPS.map(s=>s[1])),ratio=(worst/best).toFixed(2);
+ $("#report").innerHTML=`<div class="kpis">
+  <div class="kpi"><div class="l">${t("High-risk no-show rate · synthetic baseline")}</div><div class="v">${HIGHRISK.baseline}%</div><div class="l">${t("target")} ≤${HIGHRISK.target}% ${t("in 6 months (20% relative)")}</div></div>
+  <div class="kpi"><div class="l">${t("All-patient no-show rate")}</div><div class="v">21.4%</div><div class="l">705 / 3,298 · ${t("Jan 2025 – Sep 2026")}</div></div>
+  <div class="kpi"><div class="l">${t("Worst-to-best subgroup ratio")}</div><div class="v ${ratio>1.2?"bad":"ok"}">${ratio}</div><div class="l">${t("monitoring target below 1.2")}</div></div>
+  <div class="kpi"><div class="l">${t("Barriers logged this list")}</div><div class="v">${Object.values(bars).reduce((a,b)=>a+b,0)}</div><div class="l">${t("from the structured field; no manual counting")}</div></div></div>
+  <div class="rep2"><section class="panel"><div class="ph"><span>${t("Monthly no-show P-chart")}</span><small>${t("±3σ limits · pooled centre line")}</small></div><div class="chart" style="padding:10px">${pchart()}</div><div class="hint" style="padding:0 12px 10px">${t("Red point = outside control limits (August 2026 signal). The high-risk series will be added to the same chart once the pilot log has one full month.")}</div></section>
+  <section class="panel"><div class="ph"><span>${t("Subgroup table · no-show rate")}</span><small>${t("monitored, not scored")}</small></div><table class="lt"><thead><tr><th>${t("Subgroup")}</th><th style="text-align:end">${t("No-show %")}</th><th style="text-align:end">${t("vs best")}</th></tr></thead><tbody>${SUBGROUPS.map(g=>`<tr><td>${t(g[0])}</td><td style="text-align:end"><b>${g[1].toFixed(1)}</b></td><td style="text-align:end;color:${g[1]/best>1.2?"var(--red)":"inherit"}">${(g[1]/best).toFixed(2)}</td></tr>`).join("")}</tbody></table></section></div>
+  <div class="rep2" style="margin-top:12px"><section class="panel"><div class="ph"><span>${t("Rule sensitivity by subgroup")}</span><small>${t("High cut-off ≥4 · AUC")}</small></div><table class="lt"><thead><tr><th>${t("Subgroup")}</th><th style="text-align:end">${t("Sensitivity %")}</th><th style="text-align:end">AUC</th></tr></thead><tbody>${SENS.map(g=>`<tr><td>${t(g[0])}</td><td style="text-align:end;color:${g[1]<25?"var(--red)":"inherit"}"><b>${g[1].toFixed(1)}</b></td><td style="text-align:end">${g[2].toFixed(2)}</td></tr>`).join("")}</tbody></table><div class="hint" style="padding:8px 12px">${t("Under-identified groups: other language (19.8%) and 60+ km (28.4%, AUC 0.56). The lower cut-off of 3 is under evaluation, not adopted.")}</div></section>
+  <section class="panel"><div class="ph"><span>${t("Barriers recorded")}</span><small>${t("Pareto from the log")}</small></div>${Object.keys(bars).length?`<table class="lt"><tbody>${Object.entries(bars).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${t(k)}</td><td style="width:60px;text-align:end"><b>${v}</b></td></tr>`).join("")}</tbody></table>`:`<div class="empty">${t("No barriers recorded yet. The structured field feeds the monthly subgroup table.")}</div>`}</section></div>`;
+}
+function renderLead(){
+ const live=state.logs.filter(l=>!l.undone); const byId=new Map(),byFirst=new Map(); live.slice().reverse().forEach(l=>{byId.set(l.id,l);if(!byFirst.has(l.id))byFirst.set(l.id,l)});
+ const rows=P.filter(p=>!noData(p)).map(p=>({p,s:status(p),l:byId.get(p.id),f:byFirst.get(p.id)}));
+ const overdue=rows.filter(r=>r.s==="overdue"),outst=rows.filter(r=>r.s==="outstanding"),cbs=rows.filter(r=>r.s==="callback"||r.s==="retry");
+ const dueSoFar=rows.filter(r=>r.s!=="outstanding"&&(r.l||state.today>due(r.p))); const onTime=dueSoFar.filter(r=>r.f&&r.f.onTime).length;
+ const pct=dueSoFar.length?Math.round(onTime/dueSoFar.length*100):null;
+ const secs=live.map(l=>l.secs).filter(x=>x!==null&&x!==undefined).sort((a,b)=>a-b); const med=secs.length?secs[Math.floor(secs.length/2)]:null;
+ const bars=live.filter(l=>l.barrier&&!["No barrier reported","Unknown / not asked"].includes(l.barrier)).reduce((m,l)=>(m[l.barrier]=(m[l.barrier]||0)+1,m),{});
+ const row=r=>`<tr><td><b>${t("Patient")} ${r.p.n}</b> <span class="t" style="color:var(--muted)">${esc(r.p.id)}</span></td><td>${r.p.week}</td><td>${fmt(r.p.date)} ${r.p.time}</td><td>${r.p.score}</td><td>${fmt(due(r.p))}</td><td><span class="st ${r.s}">${t(S[r.s])}</span>${r.l&&r.l.callback?" "+fmt(r.l.callback):""}</td></tr>`;
+ const tbl=(title,arr)=>`<section class="panel" style="margin-bottom:12px"><div class="ph"><span>${title}</span><small>${arr.length}</small></div>${arr.length?`<table class="lt"><thead><tr><th>${t("Patient")}</th><th>${t("Week")}</th><th>${t("Visit")}</th><th>${t("Score")}</th><th>${t("Contact by")}</th><th>${t("Status")}</th></tr></thead><tbody>${arr.map(row).join("")}</tbody></table>`:`<div class="empty">${t("None.")}</div>`}</section>`;
+ $("#lead").innerHTML=`<div class="kpis">
+  <div class="kpi"><div class="l">${t("Attempt logged by deadline")}</div><div class="v ${pct===null?"":pct>=80?"ok":"bad"}">${pct===null?"—":pct+"%"}</div><div class="l">${t("target 80% · of")} ${dueSoFar.length} ${t("due so far")}</div></div>
+  <div class="kpi"><div class="l">${t("Overdue now")}</div><div class="v ${overdue.length?"bad":""}">${overdue.length}</div><div class="l">${t("no action by the contact deadline")}</div></div>
+  <div class="kpi"><div class="l">${t("Outstanding (beyond capacity)")}</div><div class="v">${outst.length}</div><div class="l">${t("kept visible, not removed")}</div></div>
+  <div class="kpi"><div class="l">${t("Median time to log")}</div><div class="v ${med===null?"":med<=30?"ok":"bad"}">${med===null?"—":med+" "+t("s")}</div><div class="l">${t("target under 30 s · from opening to Save")}</div></div></div>
+  ${tbl(t("Overdue"),overdue)}${tbl(t("Outstanding — beyond weekly capacity"),outst)}${tbl(t("Callbacks and retries scheduled"),cbs)}${tbl(t("Closed · escalated to the clinic lead"),rows.filter(r=>r.l&&r.l.closed))}
+  <section class="panel"><div class="ph"><span>${t("Barriers recorded this list")}</span><small>${Object.values(bars).reduce((a,b)=>a+b,0)}</small></div>${Object.keys(bars).length?`<table class="lt"><tbody>${Object.entries(bars).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${t(k)}</td><td style="width:60px;text-align:end"><b>${v}</b></td></tr>`).join("")}</tbody></table>`:`<div class="empty">${t("No barriers recorded yet. The structured field feeds the monthly subgroup table.")}</div>`}</section>`;
+}
+function setView(v){state.view=v;syncHisBar(v);const his=HISV.includes(v);
+ $$(".viewtabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));
+ $(".mod").style.display=his?"none":"";const lg=$(".panel.log");if(lg)lg.style.display=his||v==="project"||v==="biz"?"none":"";
+ ["lead","report","project","biz"].forEach(k=>$("#"+k).classList.toggle("on",v===k));HISV.forEach(k=>{$("#his-"+k).classList.toggle("on",v===k);if(v!==k)$("#his-"+k).innerHTML=""});
+ $("#workGrid").classList.toggle("off",v!=="work");
+ $("#titleWork").style.display=v==="work"?"":"none";$("#titleLead").style.display=v==="lead"?"":"none";$("#titleReport").style.display=v==="report"?"":"none";$("#titleProject").style.display=v==="project"?"":"none";$("#titleBiz").style.display=v==="biz"?"":"none";$("#titleHis").style.display=his?"":"none";
+ if(v==="report")renderReport();if(v==="lead")renderLead();if(v==="biz")renderBiz();if(his)renderHis()}
+$$(".viewtabs button").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.v)));
+$("#exportLog").addEventListener("click",()=>{const live=state.logs;if(!live.length){toast(t("No entries yet."));return}
+ const rows=[["patient","patient_id","appointment_id","week","visit_date","contact_by","on_time","action","override_reason","outcome","barrier","callback_date","new_appointment_date","seconds_to_log","note","logged_at","undone"]];
+ live.forEach(l=>{const p=P.find(x=>x.id===l.id)||{};rows.push([l.n,l.id,l.linkedTo||"",l.week||"",p.date||"",l.dueBy||"",l.onTime?"Y":"N",l.action,l.ovReason,l.outcome,l.barrier,l.callback,l.rebook||"",l.secs??"",l.note,l.at,l.undone?"Y":"N"])});
+ const csv="\ufeff"+rows.map(r=>r.map(v=>{let x=String(v??"");if(/^[=+\-@\t\r]/.test(x))x="'"+x;return `"${x.replaceAll('"','""')}"`}).join(",")).join("\r\n");saveCsv("AccessBridge_outreach_log.csv",csv)});
+// ---- Cognitive walkthrough mode (Section 12 "Next tests"): five steps × four questions ----
+const WT_STEPS=[["Open this week's list","The list opens sorted by score. Find the top patient.","work"],["Read why the patient is flagged","Open the top patient. The factors should be visible without clicking.","work"],["Read the suggested action and decide","Decide: use it, or choose another action with a reason.","work"],["Choose the barrier","Pick the barrier the patient reported. Check that the labels are clear.","work"],["Save the log","Save. Look for the confirmation, Done status and the Undo option.","work"]];
+const WT_Q=["Q1 Does the screen match the goal?","Q2 Is the control visible?","Q3 Is the label clear?","Q4 Does the system confirm the action?"];
+const wt={on:false,i:0,start:null,ans:WT_STEPS.map(()=>[null,null,null,null]),notes:WT_STEPS.map(()=>""),tester:""};
+function wtRender(){const st=WT_STEPS[wt.i];$("#wtTitle").textContent=`${t("Cognitive walkthrough")} · ${wt.i+1}/${WT_STEPS.length}`;
+ $("#wtBody").innerHTML=`${wt.i===0&&!wt.tester?`<div class="fg" style="margin-bottom:8px"><label>${t("Tester role (no names)")}</label><input id="wtTester" placeholder="${t("e.g. coordinator A, scheduler")}"></div>`:""}<div class="step">${t("Step")} ${wt.i+1}</div><div class="task">${t(st[0])}</div><div class="hint">${t(st[1])}</div>
+ ${WT_Q.map((q,qi)=>`<div class="q"><span>${t(q)}</span><span class="opts">${[["Yes","y"],["Warn","w"],["No","n"]].map(([v,c])=>`<button data-q="${qi}" data-v="${v}" class="${wt.ans[wt.i][qi]===v?c:""}">${t(v)}</button>`).join("")}</span></div>`).join("")}
+ <textarea id="wtNote" rows="2" placeholder="${t("Finding or fix (optional)")}">${esc(wt.notes[wt.i])}</textarea>
+ <div class="f"><button class="btn ghost" id="wtPrev" ${wt.i===0?"disabled":""}>${t("Back")}</button><span class="hint" id="wtClock"></span>${wt.i<WT_STEPS.length-1?`<button class="btn primary" id="wtNext" style="min-width:0">${t("Next")}</button>`:`<button class="btn save" id="wtDone" style="min-width:0">${t("Finish & export")}</button>`}</div>`;
+ $$("#wtBody [data-q]").forEach(b=>b.addEventListener("click",()=>{wt.ans[wt.i][+b.dataset.q]=b.dataset.v;wtRender()}));
+ $("#wtNote").addEventListener("input",e=>wt.notes[wt.i]=e.target.value);
+ const tst=$("#wtTester");if(tst)tst.addEventListener("input",e=>wt.tester=e.target.value);
+ $("#wtPrev").addEventListener("click",()=>{wt.i--;wtRender()});
+ const nx=$("#wtNext");if(nx)nx.addEventListener("click",()=>{wt.i++;wtRender()});
+ const dn=$("#wtDone");if(dn)dn.addEventListener("click",wtExport);
+ clearInterval(wt.tick);wt.tick=setInterval(()=>{if(wt.start)$("#wtClock").textContent=`${Math.round((Date.now()-wt.start)/1000)} ${t("s")}`},1000);
+}
+function wtExport(){const rows=[["tester","step","task","Q1_goal","Q2_visible","Q3_label","Q4_feedback","finding","elapsed_s","date"]];const el=wt.start?Math.round((Date.now()-wt.start)/1000):"";
+ WT_STEPS.forEach((st,i)=>rows.push([wt.tester,i+1,st[0],...wt.ans[i].map(a=>a||""),wt.notes[i],el,new Date().toISOString().slice(0,10)]));
+ const csv="\ufeff"+rows.map(r=>r.map(v=>{let x=String(v??"");if(/^[=+\-@\t\r]/.test(x))x="'"+x;return `"${x.replaceAll('"','""')}"`}).join(",")).join("\r\n");saveCsv("AccessBridge_walkthrough.csv",csv);toast(t("Walkthrough exported. Append it to Section 12."));}
+$("#wtBtn").addEventListener("click",()=>{wt.on=!wt.on;$("#wt").classList.toggle("on",wt.on);if(wt.on){if(!wt.start)wt.start=Date.now();setView("work");wtRender()}else clearInterval(wt.tick)});
+const H2V={AB:"work",Reports:"report",Patients:"patients",Scheduling:"scheduling",Orders:"orders",Results:"results"};
+$$(".hismods button").forEach(b=>b.addEventListener("click",()=>setView(H2V[b.dataset.h])));
+const V2H={work:"AB",project:"AB",biz:"AB",lead:"AB",report:"Reports",patients:"Patients",scheduling:"Scheduling",orders:"Orders",results:"Results"};
+function syncHisBar(v){$$(".hismods button").forEach(b=>{const on=b.dataset.h===V2H[v];b.classList.toggle("on",on);if(on)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")})}
+$("#role").addEventListener("change",e=>{const v={c:"work",l:"lead",q:"report"}[e.target.value];setView(v);toast(`${t("Role")}: ${t(e.target.selectedOptions[0].dataset.en||e.target.selectedOptions[0].textContent)}`)});
+$$("#role option").forEach(o=>o.dataset.en=o.textContent);
+const effTheme=()=>document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+function setTheme(th){document.documentElement.dataset.theme=th;try{localStorage.setItem("abhis_theme",th)}catch(e){}if(state.view==="report")renderReport()}
+$("#theme").addEventListener("click",()=>setTheme(effTheme()==="dark"?"light":"dark"));
+try{const th=localStorage.getItem("abhis_theme");if(th)document.documentElement.dataset.theme=th}catch(e){}
+$("#wtClose").addEventListener("click",()=>{wt.on=false;$("#wt").classList.remove("on");clearInterval(wt.tick)});
+/* ===================== HIS modules: Patients · Scheduling · Orders · Results ===================== */
+const HISV=["patients","scheduling","orders","results"];
+const hsh=s=>{let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return h};
+const PT=id=>ALL.find(x=>x.id===id);
+const pl=p=>`${t("Patient")} ${p.n}`;
+const band=sc=>sc>=4?"High":sc>=2?"Medium":"Low";
+const BANDC={High:"overdue",Medium:"callback",Low:"done"};
+const TESTS={
+ "HbA1c":{unit:"%",min:4,max:18,step:"0.1",ref:"< 7.0",flag:v=>v>=9?"Very high":v>=7?"High":"In target"},
+ "Fasting glucose":{unit:"mg/dL",min:40,max:600,step:"1",ref:"80–130",flag:v=>v>130?"High":v<80?"Low":"In target"},
+ "Lipid panel (LDL)":{unit:"mg/dL",min:20,max:400,step:"1",ref:"< 100",flag:v=>v>=100?"High":"In target"},
+ "Urine ACR":{unit:"mg/g",min:0,max:3000,step:"1",ref:"< 30",flag:v=>v>=300?"Very high":v>=30?"High":"In target"},
+ "Creatinine / eGFR":{unit:"mL/min/1.73m²",min:5,max:150,step:"1",ref:"≥ 60",flag:v=>v<30?"Very low":v<60?"Low":"In target"},
+ "Retinal screening referral":{unit:"",ref:"—",text:true,flag:v=>v==="Retinopathy found"?"Abnormal":"Normal"}};
+const RETINAL=["No retinopathy","Retinopathy found"];
+const FLAGC={"In target":"done","Normal":"done","High":"callback","Low":"callback","Abnormal":"callback","Very high":"overdue","Very low":"overdue"};
+const ORDC={Ordered:"todo",Collected:"callback",Resulted:"done",Cancelled:"outstanding"};
+const APC={Booked:"todo",Rescheduled:"callback",Attended:"done","No-show":"overdue","Late cancellation":"callback","Clinic cancellation":"outstanding"};
+const APPT_ST=["Booked","Attended","No-show","Late cancellation","Clinic cancellation"];
+const mod={appt:{},orders:[],seq:1};
+const pad4=n=>String(n).padStart(4,"0");
+function seedOrders(){const o=[];let k=1;const add=(id,test,date,status,value,rdate)=>o.push({oid:"OR"+pad4(k++),id,test,date,status,value:value??"",rdate:rdate||""});
+ ALL.forEach(p=>{const h=hsh(p.id);
+  const hd="2026-08-"+String(3+h%25).padStart(2,"0"); add(p.id,"HbA1c",hd,"Resulted",(6.3+(h%48)/10).toFixed(1),isoAdd(hd,2));
+  const od=isoAdd(p.date,-7);
+  if(p.type==="HbA1c review"){if(od<ISSUED)add(p.id,"HbA1c",od,"Resulted",(6.1+((h>>>3)%50)/10).toFixed(1),isoAdd(od,1));else add(p.id,"HbA1c",od,"Ordered")}
+  else if(p.type==="Annual review"){add(p.id,"Lipid panel (LDL)",od,"Ordered");add(p.id,"Urine ACR",od,"Ordered");add(p.id,"Retinal screening referral",od,"Ordered")}
+  else add(p.id,"Fasting glucose",od,od<ISSUED?"Collected":"Ordered");
+ });mod.seq=k;return o}
+try{const m=JSON.parse(sessionStorage.getItem("abhis_mod")||"null");if(m&&Array.isArray(m.orders)&&m.orders.length)Object.assign(mod,m);else mod.orders=seedOrders()}catch(e){mod.orders=seedOrders()}
+function persistMod(){try{sessionStorage.setItem("abhis_mod",JSON.stringify(mod));return true}catch(e){toast(t("Browser storage failed. Nothing was saved."));return false}}
+const fmtFull=d=>d?fmt(d):"—";
+const flagOf=o=>{const T=TESTS[o.test];return T.text?T.flag(o.value):T.flag(parseFloat(o.value))};
+const valOf=o=>{const T=TESTS[o.test];return T.text?t(o.value):`${o.value} ${t(T.unit)}`};
+const scoreBadge=p=>p.score>=4&&!noData(p)?`<span class="sbadge" title="${t("AccessBridge score")}">${p.score}</span>`:"";
+const plink=p=>`<button class="linkbtn" data-chart="${p.id}">${pl(p)}</button> <span class="hint">${esc(p.id)}</span>`;
+
+/* ---------- appointments (from records + rebooks logged in AccessBridge) ---------- */
+function appts(){const live=state.logs.filter(l=>!l.undone);
+ const list=ALL.map(p=>{const rb=live.find(l=>l.id===p.id&&l.rebook);return{ap:p.ap,id:p.id,date:p.date,time:p.time,type:p.type,base:rb?"Rescheduled":"Booked",note:rb?`${t("moved to")} ${fmt(rb.rebook)}`:"",rebooked:false}});
+ live.filter(l=>l.rebook).forEach((l,i)=>{const p=PT(l.id);if(!p)return;list.push({ap:l.rbId||`${l.linkedTo}-R${i+1}`,id:l.id,date:l.rebook,time:p.time,type:p.type,base:"Booked",note:`${t("rebooked from")} ${l.linkedTo}`,rebooked:true})});
+ return list.map(a=>({...a,st:mod.appt[a.ap]||a.base})).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))}
+function setAppt(ap,val){const a=appts().find(x=>x.ap===ap);if(!a)return;
+ if((val==="Attended"||val==="No-show")&&a.date>state.today){toast(t("Attendance can be recorded on or after the visit date. Move Today forward."));renderHis();return}
+ if(a.st==="Rescheduled"&&val!=="Rescheduled"){toast(t("This visit was moved in AccessBridge. Record the outcome on the new appointment."));renderHis();return}
+ const prevSt=mod.appt[ap];mod.appt[ap]=val;if(!persistMod()){if(prevSt===undefined)delete mod.appt[ap];else mod.appt[ap]=prevSt;renderHis();return}toast(t("Status saved."));renderHis()}
+
+/* ---------- orders ---------- */
+function placeOrder(id,test){if(!id||!test){toast(t("Choose a patient and a test."));return}
+ mod.orders.push({oid:"OR"+pad4(mod.seq++),id,test,date:state.today,status:"Ordered",value:"",rdate:""});if(!persistMod()){mod.orders.pop();mod.seq--;toast(t("Order not placed: browser storage failed."));return}toast(`${t("Order placed.")} ${t(test)} · ${pl(PT(id))}`);renderHis()}
+function orderAct(oid,act,btn){const o=mod.orders.find(x=>x.oid===oid);if(!o)return;
+ if(act==="collect"){o.status="Collected";o.cdate=state.today;toast(t("Sample collected."))}
+ else if(act==="cancel"){o.status="Cancelled";toast(t("Order cancelled."))}
+ else if(act==="result"){const T=TESTS[o.test],el=(btn&&btn.closest("tr")&&btn.closest("tr").querySelector(".inl"))||null;const raw=el?el.value.trim():"";
+  if(T.text){if(!RETINAL.includes(raw)){toast(t("Choose the screening outcome."));return}o.value=raw}
+  else{const v=parseFloat(raw);if(!(v>=T.min&&v<=T.max)){toast(`${t("Enter a value between")} ${T.min} ${t("and")} ${T.max} ${t(T.unit)}.`);el&&el.focus();return}o.value=String(v)}
+  o.status="Resulted";o.rdate=state.today;toast(`${t("Result saved.")} ${t(flagOf(o))}`)}
+ persistMod();renderHis()}
+function actionCell(o){const T=TESTS[o.test];
+ if(o.status==="Ordered")return`<button class="btn mini" data-oact="collect" data-oid="${o.oid}">${t(T.text?"Refer":"Collect")}</button> <button class="btn ghost mini" data-oact="cancel" data-oid="${o.oid}">${t("Cancel")}</button>`;
+ if(o.status==="Collected")return`${T.text?`<select class="inl" data-rv="${o.oid}" aria-label="${t("Enter value")} ${t(o.test)}"><option value="">${t("Select…")}</option>${RETINAL.map(r=>`<option value="${r}">${t(r)}</option>`).join("")}</select>`:`<input class="inl num" data-rv="${o.oid}" type="number" step="${T.step}" min="${T.min}" max="${T.max}" placeholder="${t(T.unit)}" aria-label="${t("Enter value")} ${t(o.test)}">`} <button class="btn mini primary" data-oact="result" data-oid="${o.oid}">${t("Save result")}</button> <button class="btn ghost mini" data-oact="cancel" data-oid="${o.oid}">${t("Cancel")}</button>`;
+ if(o.status==="Resulted")return`<b>${esc(valOf(o))}</b> <span class="st ${FLAGC[flagOf(o)]}">${t(flagOf(o))}</span>`;
+ return"—"}
+const TEST_OPTS=()=>Object.keys(TESTS).map(k=>`<option value="${k}">${t(k)}</option>`).join("");
+
+/* ---------- Patients ---------- */
+function patFiltered(){const q=(state.patQ||"").trim().toLowerCase(),f=state.patF||"all";
+ return ALL.filter(p=>(f==="all"||(f==="ab"?p.score>=4&&!noData(p):p.score<4||noData(p)))&&(!q||p.id.toLowerCase().includes(q)||p.ap.toLowerCase().includes(q)||String(p.n)===q||pl(p).toLowerCase().includes(q))).sort((a,b)=>a.n-b.n)}
+function renderPatList(){const L=patFiltered();
+ $("#patList").innerHTML=L.length?L.map(p=>`<div class="row ${p.score>=4&&!noData(p)?"high":""} ${state.pat===p.id?"sel":""}" role="button" tabindex="0" data-pid="${p.id}"><div class="sc">${noData(p)?"–":p.score}</div><div><div class="nm">${pl(p)}</div><div class="mt">${esc(p.id)} · ${t(p.lang)}</div></div>${noData(p)?`<span class="st nodata">${t(S.nodata)}</span>`:`<span class="st ${BANDC[band(p.score)]}">${t(band(p.score))}</span>`}</div>`).join(""):`<div class="empty">${t("No patients match.")}</div>`;
+ $("#patCount").textContent=`${L.length} ${t("patients")}`}
+function chartHtml(p){const live=state.logs.filter(l=>l.id===p.id);const A=appts().filter(a=>a.id===p.id);const O=mod.orders.filter(o=>o.id===p.id).sort((a,b)=>b.date.localeCompare(a.date));const Rz=O.filter(o=>o.status==="Resulted").sort((a,b)=>b.rdate.localeCompare(a.rdate));
+ const ab=p.score>=4;
+ return`<div class="banner"><div><h2>${pl(p)}</h2><div class="meta">${esc(p.id)} · ${t("Language")}: ${t(p.lang)} · ${t("Distance")}: ${t(p.dist)} · ${t("Mobile")}: ${p.mobile==="Y"?t("on file"):t("none")} · ${t("Reminder consent")}: ${p.consent==="Y"?t("yes"):t("no")} · ${t("Data consent")}: ${noData(p)?t("no"):t("yes")}</div></div><div class="ids">${t("Prior no-shows (12 months)")}: <b>${p.prior}</b></div></div>
+ ${noData(p)?`<div class="section"><div class="suggest"><div class="lab">AccessBridge</div><div class="ttl"><span class="st nodata">${t(S.nodata)}</span></div>
+  <div class="btnrow"><span class="hint">${t("Not processed by AccessBridge · routine reminder only")}</span></div></div></div>`:`<div class="section"><div class="suggest"><div class="lab">AccessBridge</div><div class="ttl">${t("Score")} ${p.score} · <span class="st ${BANDC[band(p.score)]}">${t(band(p.score))}</span>${ab?` · <span class="st ${status(p)}">${t(S[status(p)])}</span>`:""}</div>
+  <div class="chips" style="margin-top:6px">${factors(p).map(f=>`<span class="chip ${f.v?"":"zero"}">${t(f.k)} <b>(+${f.v})</b></span>`).join("")}</div>
+  <div class="btnrow">${ab?`<button class="btn primary" data-ab="${p.id}">${t("Open in AccessBridge")}</button>`:`<span class="hint">${t("Not on the outreach list · routine reminder only")}</span>`}</div></div></div>`}
+ <div class="section"><h3>${t("Appointments")}</h3>${A.length?`<table class="lt"><thead><tr><th>${t("Date")}</th><th>${t("Time")}</th><th>${t("Type")}</th><th>${t("Appointment")}</th><th>${t("Status")}</th></tr></thead><tbody>${A.map(a=>`<tr><td>${fmt(a.date)}</td><td>${a.time}</td><td>${t(a.type)}</td><td>${esc(a.ap)}${a.note?` <span class="hint">· ${esc(a.note)}</span>`:""}</td><td><span class="st ${APC[a.st]}">${t(a.st)}</span></td></tr>`).join("")}</tbody></table>`:`<div class="empty">${t("None.")}</div>`}</div>
+ <div class="section"><h3>${t("Orders")}</h3><div class="tb"><label class="hint" for="chTest">${t("New order")}</label><select id="chTest" class="inl">${TEST_OPTS()}</select><button class="btn mini primary" data-place="${p.id}">${t("Place order")}</button></div>
+  ${O.length?`<table class="lt"><thead><tr><th>${t("Order")}</th><th>${t("Date")}</th><th>${t("Test")}</th><th>${t("Status")}</th><th>${t("Actions")}</th></tr></thead><tbody>${O.map(o=>`<tr><td>${o.oid}</td><td>${fmt(o.date)}</td><td>${t(o.test)}</td><td><span class="st ${ORDC[o.status]}">${t(o.status)}</span></td><td>${actionCell(o)}</td></tr>`).join("")}</tbody></table>`:`<div class="empty">${t("None.")}</div>`}</div>
+ <div class="section"><h3>${t("Results")}</h3>${Rz.length?`<table class="lt"><thead><tr><th>${t("Date")}</th><th>${t("Test")}</th><th>${t("Value")}</th><th>${t("Reference")}</th><th>${t("Flag")}</th></tr></thead><tbody>${Rz.map(o=>`<tr><td>${fmt(o.rdate)}</td><td>${t(o.test)}</td><td><b>${esc(valOf(o))}</b></td><td>${TESTS[o.test].ref} ${t(TESTS[o.test].unit)}</td><td><span class="st ${FLAGC[flagOf(o)]}">${t(flagOf(o))}</span></td></tr>`).join("")}</tbody></table>`:`<div class="empty">${t("None.")}</div>`}<div class="hint" style="margin-top:6px">${t("Results are clinical context only. They are not inputs to the AccessBridge score.")}</div></div>
+ <div class="section"><h3>${t("Outreach log")}</h3>${live.length?live.map(l=>`<div class="logrow ${l.undone?"undone":""}" style="padding:6px 0"><div>${t(l.action)}${l.ovReason?` <span class="t">(${t("instead of suggestion")}: ${t(l.ovReason)})</span>`:""}</div><div>${t(l.outcome)} · ${t("Barrier")}: ${t(l.barrier)}${l.callback?` · ${t(l.retry?"retry":"callback")} ${fmt(l.callback)}`:""}${l.closed?" · "+t("closed"):""}${l.rebook?` · ${t("rebooked")} ${fmt(l.rebook)}`:""}</div><div class="t">${tm(l)}${l.undone?" · "+t("undone"):""}</div></div>`).join(""):`<div class="empty">${t("No outreach recorded for this patient.")}</div>`}</div>`}
+function renderPatients(){if(!state.pat||!PT(state.pat))state.pat=(patFiltered()[0]||ALL[0]).id;
+ $("#his-patients").innerHTML=`<div class="grid"><section class="panel" aria-label="${t("Patients")}"><div class="ph"><span>${t("Patient registry")}</span><small id="patCount"></small></div>
+  <div class="tb" style="padding:8px 10px;border-bottom:1px solid var(--line)"><input id="patQ" class="inl" style="flex:1;min-width:140px" placeholder="${t("Search ID, appointment or patient no.")}" value="${esc(state.patQ||"")}" aria-label="${t("Search ID, appointment or patient no.")}"><select id="patF" class="inl" aria-label="${t("Filter")}"><option value="all">${t("All patients")}</option><option value="ab" ${state.patF==="ab"?"selected":""}>${t("On AccessBridge list")}</option><option value="rt" ${state.patF==="rt"?"selected":""}>${t("Routine reminders only")}</option></select></div>
+  <div class="list" id="patList"></div></section>
+  <section class="panel"><div class="detail" id="patChart">${chartHtml(PT(state.pat))}</div></section></div>`;
+ renderPatList()}
+function openChart(id){state.pat=id;state.patQ="";state.patF="all";setView("patients");window.scrollTo({top:0,behavior:"smooth"})}
+
+/* ---------- Scheduling ---------- */
+function renderSched(){const f=state.schedF||"all",flag=!!state.schedFlag,all=appts();
+ const inR=a=>f==="all"||(f==="w1"?a.date<"2026-11-08":f==="w2"?(a.date>="2026-11-08"&&a.date<="2026-11-12"):a.date>"2026-11-12");
+ const L=all.filter(a=>inR(a)&&(!flag||(PT(a.id).score>=4&&!noData(PT(a.id)))));
+ const rec=all.filter(a=>a.st==="Attended"||a.st==="No-show"),fl=rec.filter(a=>PT(a.id).score>=4),ot=rec.filter(a=>PT(a.id).score<4);
+ const rate=arr=>arr.length?Math.round(arr.filter(a=>a.st==="No-show").length/arr.length*100)+"%":"—";
+ const booked=all.filter(a=>a.st==="Booked").length,late=all.filter(a=>a.st==="Late cancellation").length;
+ let last="",rows="";L.forEach(a=>{const p=PT(a.id);if(a.date!==last){rows+=`<tr class="wkrow"><td colspan="6">${fmt(a.date)}</td></tr>`;last=a.date}
+  rows+=`<tr><td>${a.time}</td><td>${plink(p)}</td><td>${t(a.type)}${a.rebooked?` <span class="st callback">${t("Rebooked")}</span>`:""}</td><td>${p.score>=4?`${scoreBadge(p)} <span class="st ${status(p)}">${t(S[status(p)])}</span>`:`<span class="hint">${t("Routine reminder")}</span>`}</td>
+  <td>${a.st==="Rescheduled"?`<span class="st callback">${t("Rescheduled")}</span>`:`<select class="inl" data-ap="${a.ap}" aria-label="${t("Status")} ${esc(a.ap)}">${APPT_ST.map(s=>`<option value="${s}" ${a.st===s?"selected":""}>${t(s)}</option>`).join("")}</select>`}</td><td class="hint">${esc(a.ap)}${a.note?` · ${esc(a.note)}`:""}</td></tr>`});
+ $("#his-scheduling").innerHTML=`<div class="kpis"><div class="kpi"><div class="l">${t("Booked visits")}</div><div class="v">${booked}</div><div class="l">${t("waiting for the visit day")}</div></div>
+  <div class="kpi"><div class="l">${t("No-show rate · flagged")}</div><div class="v">${rate(fl)}</div><div class="l">${fl.length} ${t("recorded visits")} · ${t("score 4 or more")}</div></div>
+  <div class="kpi"><div class="l">${t("No-show rate · others")}</div><div class="v">${rate(ot)}</div><div class="l">${ot.length} ${t("recorded visits")}</div></div>
+  <div class="kpi"><div class="l">${t("Late cancellations")}</div><div class="v">${late}</div><div class="l">${t("balancing measure, not a no-show")}</div></div></div>
+ <section class="panel"><div class="ph"><span>${t("Clinic diary · Sunday to Thursday")}</span><span class="tb"><select id="schedF" class="inl" aria-label="${t("Range")}"><option value="all">${t("All dates")}</option><option value="w1" ${f==="w1"?"selected":""}>${t("Week")} 1 · ${t("1–5 Nov")}</option><option value="w2" ${f==="w2"?"selected":""}>${t("Week")} 2 · ${t("8–12 Nov")}</option><option value="later" ${f==="later"?"selected":""}>${t("Rebooked later")}</option></select><label class="hint"><input type="checkbox" id="schedFlag" ${flag?"checked":""}> ${t("Flagged only")}</label></span></div>
+  <div style="overflow-x:auto"><table class="lt"><thead><tr><th>${t("Time")}</th><th>${t("Patient")}</th><th>${t("Type")}</th><th>AccessBridge</th><th>${t("Status")}</th><th>${t("Appointment")}</th></tr></thead><tbody>${rows||`<tr><td colspan="6" class="empty">${t("None.")}</td></tr>`}</tbody></table></div>
+  <div class="hint" style="padding:8px 12px">${t("Attendance is recorded after the visit. Late cancellation = patient cancels or reschedules 1 day or less before the visit; reported separately. Clinic cancellations are excluded from the no-show rate.")}</div></section>`}
+
+/* ---------- Orders ---------- */
+function renderOrders(){const f=state.ordF||"open";
+ const L=mod.orders.filter(o=>f==="all"||(f==="open"?(o.status==="Ordered"||o.status==="Collected"):o.status===f)).sort((a,b)=>b.date.localeCompare(a.date)||b.oid.localeCompare(a.oid));
+ const c=s=>mod.orders.filter(o=>o.status===s).length;
+ $("#his-orders").innerHTML=`<div class="kpis"><div class="kpi"><div class="l">${t("Open orders")}</div><div class="v">${c("Ordered")+c("Collected")}</div><div class="l">${t("ordered or collected")}</div></div>
+  <div class="kpi"><div class="l">${t("Awaiting collection")}</div><div class="v">${c("Ordered")}</div><div class="l">${t("sample or referral not done")}</div></div>
+  <div class="kpi"><div class="l">${t("Awaiting result")}</div><div class="v">${c("Collected")}</div><div class="l">${t("enter the value to close")}</div></div>
+  <div class="kpi"><div class="l">${t("Resulted")}</div><div class="v">${c("Resulted")}</div><div class="l">${t("visible in Results")}</div></div></div>
+ <section class="panel" style="margin-bottom:12px"><div class="ph"><span>${t("New order")}</span></div><div class="tb" style="padding:10px 12px"><select id="ordPat" class="inl" aria-label="${t("Patient")}"><option value="">${t("Patient")}…</option>${[...ALL].sort((a,b)=>a.n-b.n).map(p=>`<option value="${p.id}">${pl(p)} · ${esc(p.id)}</option>`).join("")}</select><select id="ordTest" class="inl" aria-label="${t("Test")}">${TEST_OPTS()}</select><button class="btn mini primary" id="ordPlace">${t("Place order")}</button><span class="hint">${t("Order date")}: ${fmt(state.today)}</span></div></section>
+ <section class="panel"><div class="ph"><span>${t("Order list")}</span><select id="ordF" class="inl" aria-label="${t("Filter")}">${[["open","Open"],["Ordered","Ordered"],["Collected","Collected"],["Resulted","Resulted"],["Cancelled","Cancelled"],["all","All"]].map(([v,l])=>`<option value="${v}" ${f===v?"selected":""}>${t(l)}</option>`).join("")}</select></div>
+  <div style="overflow-x:auto"><table class="lt"><thead><tr><th>${t("Order")}</th><th>${t("Date")}</th><th>${t("Patient")}</th><th>${t("Test")}</th><th>${t("Status")}</th><th>${t("Actions")}</th></tr></thead><tbody>${L.map(o=>`<tr><td>${o.oid}</td><td>${fmt(o.date)}</td><td>${plink(PT(o.id))}</td><td>${t(o.test)}</td><td><span class="st ${ORDC[o.status]}">${t(o.status)}</span></td><td>${actionCell(o)}</td></tr>`).join("")||`<tr><td colspan="6" class="empty">${t("None.")}</td></tr>`}</tbody></table></div></section>`}
+
+/* ---------- Results ---------- */
+function renderResults(){const f=state.resF||"all",tf=state.resT||"all";
+ const R0=mod.orders.filter(o=>o.status==="Resulted");
+ const L=R0.filter(o=>(tf==="all"||o.test===tf)&&(f==="all"||!["In target","Normal"].includes(flagOf(o)))).sort((a,b)=>b.rdate.localeCompare(a.rdate));
+ const latest={};R0.filter(o=>o.test==="HbA1c").sort((a,b)=>a.rdate.localeCompare(b.rdate)).forEach(o=>latest[o.id]=parseFloat(o.value));
+ const vals=Object.values(latest).sort((a,b)=>a-b),med=vals.length?vals[Math.floor(vals.length/2)].toFixed(1)+"%":"—";
+ const hi=Object.entries(latest).filter(([,v])=>v>=9),hiAB=hi.filter(([id])=>PT(id).score>=4).length;
+ $("#his-results").innerHTML=`<div class="kpis"><div class="kpi"><div class="l">${t("Results shown")}</div><div class="v">${L.length}</div><div class="l">${t("of")} ${R0.length} ${t("resulted tests")}</div></div>
+  <div class="kpi"><div class="l">${t("Abnormal")}</div><div class="v">${R0.filter(o=>!["In target","Normal"].includes(flagOf(o))).length}</div><div class="l">${t("outside the reference range")}</div></div>
+  <div class="kpi"><div class="l">${t("Median latest HbA1c")}</div><div class="v">${med}</div><div class="l">${t("latest result per patient")}</div></div>
+  <div class="kpi"><div class="l">${t("HbA1c 9% or more")}</div><div class="v">${hi.length}</div><div class="l">${hiAB} ${t("of them on the AccessBridge list")}</div></div></div>
+ <section class="panel"><div class="ph"><span>${t("Resulted tests")}</span><span class="tb"><select id="resT" class="inl" aria-label="${t("Test")}"><option value="all">${t("All tests")}</option>${Object.keys(TESTS).map(k=>`<option value="${k}" ${tf===k?"selected":""}>${t(k)}</option>`).join("")}</select><select id="resF" class="inl" aria-label="${t("Filter")}"><option value="all">${t("All")}</option><option value="abn" ${f==="abn"?"selected":""}>${t("Abnormal only")}</option></select></span></div>
+  <div style="overflow-x:auto"><table class="lt"><thead><tr><th>${t("Date")}</th><th>${t("Patient")}</th><th>${t("Test")}</th><th>${t("Value")}</th><th>${t("Reference")}</th><th>${t("Flag")}</th><th>AccessBridge</th></tr></thead><tbody>${L.map(o=>{const p=PT(o.id);return`<tr><td>${fmt(o.rdate)}</td><td>${plink(p)}</td><td>${t(o.test)}</td><td><b>${esc(valOf(o))}</b></td><td>${TESTS[o.test].ref} ${t(TESTS[o.test].unit)}</td><td><span class="st ${FLAGC[flagOf(o)]}">${t(flagOf(o))}</span></td><td>${p.score>=4?scoreBadge(p):"—"}</td></tr>`}).join("")||`<tr><td colspan="7" class="empty">${t("None.")}</td></tr>`}</tbody></table></div>
+  <div class="hint" style="padding:8px 12px">${t("Results are clinical context only. They are not inputs to the AccessBridge score.")}</div></section>`}
+
+/* ---------- module router + events ---------- */
+const HIS_TITLES={patients:["Patients","Patient registry and chart. Synthetic records only; the AccessBridge card shows the score and its factors."],scheduling:["Scheduling","Clinic appointments, Sunday to Thursday. Record attendance after the visit; visits rebooked in AccessBridge appear here."],orders:["Orders","Laboratory and referral orders. Place, collect, enter results or cancel."],results:["Results","Resulted tests with reference ranges and flags. Shown for clinical context only."]};
+function renderHis(){const v=state.view;if(!HISV.includes(v))return;$("#hisH1").textContent=t(HIS_TITLES[v][0]);$("#hisP").textContent=t(HIS_TITLES[v][1]);
+ ({patients:renderPatients,scheduling:renderSched,orders:renderOrders,results:renderResults})[v]()}
+document.addEventListener("click",e=>{const el=e.target.closest("[data-chart],[data-ab],[data-pid],[data-oact],[data-place],#ordPlace");if(!el)return;
+ if(el.dataset.chart){openChart(el.dataset.chart)}
+ else if(el.dataset.ab){setView("work");select(el.dataset.ab);window.scrollTo({top:0,behavior:"smooth"})}
+ else if(el.dataset.pid){state.pat=el.dataset.pid;renderPatList();$("#patChart").innerHTML=chartHtml(PT(state.pat))}
+ else if(el.dataset.oact){orderAct(el.dataset.oid,el.dataset.oact,el)}
+ else if(el.dataset.place){placeOrder(el.dataset.place,$("#chTest").value)}
+ else if(el.id==="ordPlace"){placeOrder($("#ordPat").value,$("#ordTest").value)}});
+document.addEventListener("keydown",e=>{const el=e.target.closest&&e.target.closest("[data-pid]");if(el&&(e.key==="Enter"||e.key===" ")){e.preventDefault();el.click()}});
+document.addEventListener("change",e=>{const el=e.target;
+ if(el.matches("select[data-ap]"))setAppt(el.dataset.ap,el.value);
+ else if(el.id==="schedF"){state.schedF=el.value;renderSched()}
+ else if(el.id==="schedFlag"){state.schedFlag=el.checked;renderSched()}
+ else if(el.id==="ordF"){state.ordF=el.value;renderOrders()}
+ else if(el.id==="resF"){state.resF=el.value;renderResults()}
+ else if(el.id==="resT"){state.resT=el.value;renderResults()}
+ else if(el.id==="patF"){state.patF=el.value;renderPatList()}});
+document.addEventListener("input",e=>{if(e.target.id==="patQ"){state.patQ=e.target.value;renderPatList()}});
+$("#today").addEventListener("change",()=>{state.today=$("#today").value;if(HISV.includes(state.view))renderHis()});
+$("#lang").addEventListener("click",()=>{if(HISV.includes(state.view))renderHis()});
+
+/* File save: hosted page uses the viewer's download permission; a local file uses a normal download link */
+let DL=null;try{if(window.claude&&typeof window.claude.use==="function")window.claude.use("downloads").then(d=>{DL=d}).catch(()=>{})}catch(e){}
+async function saveCsv(name,csv){
+ if(DL){try{await DL.save({filename:name,data:csv});return}catch(e){if(e&&e.code==="declined")return;if(e&&e.code==="rate_limited"){toast(t("Please wait, then try again."));return}}}
+ try{const u=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),800)}catch(e){toast(t("Download is not available here."))}}
+let STORE_OK=true;
+function persist(logs=state.logs){try{sessionStorage.setItem("abhis",JSON.stringify(logs));STORE_OK=true;return true}catch(e){STORE_OK=false;toast(t(logs===state.logs?"Could not store the log in this browser. Entries stay on this page only.":"Could not store the log in this browser. No change was made. Please retry."));return false}}
+function toast(m){const x=$("#toast");x.textContent=m;x.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>x.classList.remove("show"),2600)}
+$("#cap").addEventListener("input",()=>{CAP=Math.max(1,Math.min(20,Number($("#cap").value)||6));renderList();renderDetail();if(state.view==="lead")renderLead()});
+$("#today").addEventListener("change",()=>{state.today=$("#today").value;renderList();renderDetail();if(state.view==="lead")renderLead()});
+
+// ---------- language ----------
+const AR={"TRAINING / SYNTHETIC":"تدريب / بيانات اصطناعية","Care coordinator · Diabetes clinic":"منسّق الرعاية · عيادة السكري","Patients":"المرضى","Scheduling":"الجدولة","Care coordination":"تنسيق الرعاية","Orders":"الطلبات","Results":"النتائج","Reports":"التقارير","AccessBridge · Weekly worklist":"AccessBridge · قائمة العمل الأسبوعية","Lists for 1–12 Nov 2026 · built Thu 29 Oct":"قوائم 1–12 نوفمبر 2026 · أُنشئت الخميس 29 أكتوبر","Today":"اليوم",
+"One screen: the list, the reason, the suggested action and the log":"شاشة واحدة: القائمة، والسبب، والإجراء المقترح، والسجل","Contact the flagged patients before the visit, then log the action, the outcome and the barrier in one step. The score sorts the list; the coordinator decides.":"تواصل مع المرضى المُعلَّمين قبل الزيارة، ثم سجّل الإجراء والنتيجة والعائق في خطوة واحدة. الدرجة ترتّب القائمة؛ والمنسّق يقرر.","Synthetic patients. Not a live system. Not for clinical use. No patient data leaves this page.":"مرضى اصطناعيون. ليس نظاماً حياً. ليس للاستخدام السريري. لا تغادر أي بيانات هذه الصفحة.",
+"This week, sorted by score":"هذا الأسبوع، مرتب حسب الدرجة","All eligible patients are shown. Any beyond capacity are marked Outstanding.":"تظهر كل المرضى المؤهلين. من يتجاوز السعة يُعلَّم «معلّق».","Select a patient to start.":"اختر مريضاً للبدء.","Outreach log · this week":"سجل التواصل · هذا الأسبوع","No entries yet.":"لا توجد إدخالات بعد.",
+"Patient":"المريض","score":"الدرجة","Score":"الدرجة","To do":"للتنفيذ","Overdue":"متأخر","Done":"تم","Callback":"معاودة اتصال","Outstanding":"معلّق","to do":"للتنفيذ","overdue":"متأخر","done":"تم","outstanding":"معلّق","Capacity":"السعة","week":"أسبوع","entries":"إدخال",
+"Visit":"الزيارة","Contact by":"التواصل قبل","Language":"اللغة","Mobile":"الهاتف","on file":"مسجّل","none":"لا يوجد","Reminder consent":"موافقة التذكير","yes":"نعم","no":"لا","Other":"أخرى","English":"الإنجليزية","Arabic":"العربية","HbA1c review":"مراجعة HbA1c","Routine follow-up":"متابعة روتينية","Annual review":"مراجعة سنوية",
+"Why flagged":"سبب التعليم","Suggested action":"الإجراء المقترح","Reason":"السبب","Use this action":"استخدم هذا الإجراء","Choose another action":"اختر إجراءً آخر","Why another action? (required)":"لماذا إجراء آخر؟ (مطلوب)","Select a reason…":"اختر سبباً…","Patient preference already known":"تفضيل المريض معروف مسبقاً","Contact details updated today":"تم تحديث بيانات الاتصال اليوم","Clinical judgement":"تقدير سريري","Already contacted this week":"تم التواصل هذا الأسبوع بالفعل","Other (note)":"أخرى (ملاحظة)",
+"Log the outcome":"تسجيل النتيجة","Action":"الإجراء","Outcome":"النتيجة","Barrier":"العائق","Select…":"اختر…","Callback date":"تاريخ معاودة الاتصال","Patient returns to the list on this day.":"يعود المريض إلى القائمة في هذا اليوم.","Note (optional, no identifying details)":"ملاحظة (اختيارية، دون تفاصيل معرِّفة)","Save":"حفظ","Last entry":"آخر إدخال","callback":"معاودة اتصال","Record what the patient said, not what the score suggests.":"سجّل ما قاله المريض، لا ما تقترحه الدرجة.",
+"Phone call":"اتصال هاتفي","Send reminder":"إرسال تذكير","Offer telehealth or transport referral":"عرض الرعاية عن بُعد أو إحالة مواصلات","Verify contact route":"التحقق من قناة الاتصال","Confirm appointment":"تأكيد الموعد","Letter":"خطاب","No action — review later":"لا إجراء — مراجعة لاحقاً",
+"Reached, attending":"تم الوصول، سيحضر","Reached, rebooked":"تم الوصول، أُعيد الحجز","Reached, will call back":"تم الوصول، سيعاود الاتصال","Reached, declined":"تم الوصول، رفض","Not reached":"لم يتم الوصول","Wrong number":"رقم خاطئ",
+"No barrier reported":"لم يُبلّغ عن عائق","Away or travelling":"بعيد أو مسافر","No transport to clinic":"لا مواصلات إلى العيادة","Cost":"التكلفة","Work or school":"العمل أو الدراسة","Language or communication":"اللغة أو التواصل","Forgot or unaware":"نسيان أو عدم علم","Illness":"مرض","Family responsibilities":"مسؤوليات عائلية","Patient is away from home or travelling on the visit date (data field: Travel)":"المريض بعيد عن المنزل أو مسافر في تاريخ الزيارة (حقل البيانات: السفر)","Patient cannot reach the clinic (data field: Transport difficulty)":"لا يستطيع المريض الوصول إلى العيادة (حقل البيانات: صعوبة المواصلات)",
+"Coordinator worklist":"قائمة عمل المنسّق","Lead view":"عرض المسؤول","Week":"الأسبوع","1–5 Nov":"1–5 نوفمبر","8–12 Nov":"8–12 نوفمبر","no.":"رقم","All eligible patients (score 4 or more) are shown. Any beyond capacity are marked Outstanding.":"تظهر كل المرضى المؤهلين (الدرجة 4 فأكثر). من يتجاوز السعة يُعلَّم «معلّق».","medium/low patients get routine reminders":"مريضاً بخطورة متوسطة/منخفضة يتلقون تذكيرات روتينية","Outreach log · this list":"سجل التواصل · هذه القائمة","Export CSV":"تصدير CSV","New appointment date":"تاريخ الموعد الجديد","Linked to this visit":"مرتبط بهذه الزيارة","Enter the new appointment date.":"أدخل تاريخ الموعد الجديد.","Rebooked for":"أُعيد الحجز في","linked to":"مرتبط بـ","Logged in":"سُجّل خلال","s":"ث","rebooked":"أُعيد الحجز","Status":"الحالة","None.":"لا شيء.","Attempt logged by deadline":"سُجّلت محاولة قبل الموعد النهائي","target 80% · of":"الهدف 80% · من","due so far":"مستحقة حتى الآن","Overdue now":"متأخر الآن","no action by the contact deadline":"لا إجراء حتى الموعد النهائي للتواصل","Outstanding (beyond capacity)":"معلّق (يتجاوز السعة)","kept visible, not removed":"يبقى ظاهراً ولا يُحذف","Median time to log":"وسيط زمن التسجيل","target under 30 s · from opening to Save":"الهدف أقل من 30 ث · من الفتح إلى الحفظ","Outstanding — beyond weekly capacity":"معلّق — يتجاوز السعة الأسبوعية","Callbacks scheduled":"معاودات الاتصال المجدولة","Barriers recorded this list":"العوائق المسجّلة في هذه القائمة","No barriers recorded yet. The structured field feeds the monthly subgroup table.":"لم تُسجّل عوائق بعد. يغذّي الحقل المهيكل جدول المجموعات الفرعية الشهري.","Capacity/week":"السعة/أسبوع","The clinic is closed on Friday and Saturday. Choose a clinic day.":"العيادة مغلقة الجمعة والسبت. اختر يوم عمل.","Lead view: deadlines, capacity and barriers":"عرض المسؤول: المواعيد النهائية والسعة والعوائق","What the coordinator lead sees each week: who is overdue, who waits beyond capacity, and whether logging stays under 30 seconds.":"ما يراه مسؤول التنسيق أسبوعياً: من تأخر، ومن ينتظر خارج السعة، وهل يبقى التسجيل أقل من 30 ثانية.","Monthly report":"التقرير الشهري","Monthly report: high-risk no-show P-chart and subgroup table":"التقرير الشهري: مخطط P لتغيّب عالية الخطورة وجدول المجموعات الفرعية","Built from the weekly extract and the outreach log without manual counting. Owned by the clinic quality lead; the Equity Steward reviews the subgroup table.":"يُبنى من المستخرج الأسبوعي وسجل التواصل دون عدّ يدوي. يملكه قائد جودة العيادة؛ ويراجع مسؤول الإنصاف جدول المجموعات الفرعية.","High-risk no-show rate · synthetic baseline":"معدل تغيّب عالية الخطورة · خط أساس اصطناعي","target":"الهدف","in 6 months (20% relative)":"خلال 6 أشهر (انخفاض نسبي 20%)","All-patient no-show rate":"معدل التغيّب لجميع المرضى","Jan 2025 – Sep 2026":"يناير 2025 – سبتمبر 2026","Worst-to-best subgroup ratio":"نسبة أسوأ إلى أفضل مجموعة","monitoring target below 1.2":"هدف المراقبة أقل من 1.2","Barriers logged this list":"العوائق المسجّلة في هذه القائمة","from the structured field; no manual counting":"من الحقل المهيكل؛ دون عدّ يدوي","Monthly no-show P-chart":"مخطط P الشهري للتغيّب","±3σ limits · pooled centre line":"حدود ±3σ · خط مركز مجمّع","Red point = outside control limits (August 2026 signal). The high-risk series will be added to the same chart once the pilot log has one full month.":"النقطة الحمراء = خارج حدود التحكم (إشارة أغسطس 2026). ستُضاف سلسلة عالية الخطورة إلى المخطط نفسه بعد اكتمال شهر من سجل التجربة.","Subgroup table · no-show rate":"جدول المجموعات الفرعية · معدل التغيّب","monitored, not scored":"مراقَب، غير مُدرج في الدرجة","Subgroup":"المجموعة الفرعية","No-show %":"التغيّب %","vs best":"مقابل الأفضل","Rule sensitivity by subgroup":"حساسية القاعدة حسب المجموعة","High cut-off ≥4 · AUC":"حد عالية ≥4 · AUC","Sensitivity %":"الحساسية %","Under-identified groups: other language (19.8%) and 60+ km (28.4%, AUC 0.56). The lower cut-off of 3 is under evaluation, not adopted.":"المجموعات ناقصة التحديد: اللغات الأخرى (19.8%) و60+ كم (28.4%، AUC 0.56). الحد الأدنى 3 قيد التقييم وغير معتمد.","Barriers recorded":"العوائق المسجّلة","Pareto from the log":"باريتو من السجل","outside control limits":"خارج حدود التحكم","Monthly no-show rate P-chart with control limits":"مخطط P الشهري للتغيّب مع حدود التحكم","Payer: Self-pay":"جهة الدفع: ذاتي","Payer: Government":"جهة الدفع: حكومي","Payer: Private":"جهة الدفع: خاص","Distance: 60+ km":"المسافة: 60+ كم","Language: Arabic":"اللغة: العربية","Language: English":"اللغة: الإنجليزية","Language: Other":"اللغة: أخرى","Nationality: National":"الجنسية: مواطن","Nationality: Expatriate":"الجنسية: مقيم","Sex: Female":"الجنس: أنثى","Sex: Male":"الجنس: ذكر","Open telehealth booking (same visit type)":"فتح حجز الرعاية عن بُعد (نوع الزيارة نفسه)","mock link — opens the HIS telehealth slot search":"رابط تجريبي — يفتح بحث مواعيد الرعاية عن بُعد في النظام","Telehealth slot search would open here (not in v1).":"سيفتح بحث مواعيد الرعاية عن بُعد هنا (ليس في الإصدار الأول).","Reminder template · patient language":"قالب التذكير · لغة المريض","interpreter line available":"خط مترجم متاح","Walkthrough":"الاختبار الإدراكي","Cognitive walkthrough":"اختبار إدراكي","Tester role (no names)":"دور المختبِر (دون أسماء)","e.g. coordinator A, scheduler":"مثال: منسّق أ، مجدول","Step":"الخطوة","Open this week's list":"افتح قائمة هذا الأسبوع","The list opens sorted by score. Find the top patient.":"تُفتح القائمة مرتبة حسب الدرجة. ابحث عن المريض الأول.","Read why the patient is flagged":"اقرأ سبب تعليم المريض","Open the top patient. The factors should be visible without clicking.":"افتح المريض الأول. يجب أن تظهر العوامل دون نقر.","Read the suggested action and decide":"اقرأ الإجراء المقترح وقرر","Decide: use it, or choose another action with a reason.":"قرر: استخدمه، أو اختر إجراءً آخر مع سبب.","Choose the barrier":"اختر العائق","Pick the barrier the patient reported. Check that the labels are clear.":"اختر العائق الذي أبلغ عنه المريض. تحقق من وضوح التسميات.","Save the log":"احفظ السجل","Save. Look for the confirmation, Done status and the Undo option.":"احفظ. ابحث عن التأكيد وحالة «تم» وخيار التراجع.","Q1 Does the screen match the goal?":"س1 هل تطابق الشاشة الهدف؟","Q2 Is the control visible?":"س2 هل عنصر التحكم ظاهر؟","Q3 Is the label clear?":"س3 هل التسمية واضحة؟","Q4 Does the system confirm the action?":"س4 هل يؤكد النظام الإجراء؟","Yes":"نعم","Warn":"تحذير","No":"لا","Finding or fix (optional)":"ملاحظة أو إصلاح (اختياري)","Back":"رجوع","Next":"التالي","Finish & export":"إنهاء وتصدير","Walkthrough exported. Append it to Section 12.":"تم تصدير الاختبار. أضفه إلى القسم 12.","HIS module outside the AccessBridge prototype (not built).":"وحدة في النظام خارج نموذج AccessBridge (غير مبنية).","RECORD":"تسجيل","Current working position":"الموقف العملي الحالي","Audit by subgroup":"تدقيق حسب المجموعة الفرعية","One-click outcome log":"سجل نتائج بنقرة واحدة","Decision":"القرار","High-risk no-show rate":"معدل التغيّب لعالية الخطورة","One-click structured outcome log":"سجل نتائج مهيكل بنقرة واحدة","From signal to meaningful follow-up":"من الإشارة إلى متابعة ذات معنى","Six-month high-risk target":"هدف ستة أشهر لعالية الخطورة","Do not suggest SMS/WhatsApp when consent is absent; do not suggest phone outreach if no usable number is available without first verifying contact details.":"لا تقترح SMS/واتساب عند غياب الموافقة؛ ولا تقترح التواصل الهاتفي إذا لم يتوفر رقم صالح دون التحقق أولاً من بيانات الاتصال.","Potential access signal is checked with the patient; never assumed.":"تُراجع إشارة الوصول المحتملة مع المريض؛ ولا تُفترض أبداً.","Late cancellation":"إلغاء متأخر","Machine-learning model":"نموذج تعلّم آلي","39.5% synthetic baseline → ≤31.6% (20% relative reduction); measure the real baseline before the pilot":"خط أساس اصطناعي 39.5% ← ≤31.6% (انخفاض نسبي 20%)؛ يُقاس خط الأساس الحقيقي قبل التجربة","Proactive risk controls":"ضوابط مخاطر استباقية","Patient-initiated cancellation / reschedule ≤1 day; separate balancing measure, not a no-show":"إلغاء / إعادة جدولة من المريض قبل يوم أو أقل؛ مقياس موازنة منفصل وليس تغيّباً","Could deepen access disparities":"قد يعمّق تفاوتات الوصول","Transparent attendance-risk score and visible contributing factors.":"درجة شفافة لخطر الحضور مع عوامل مساهمة ظاهرة.","· Explain the problem":"· اشرح المشكلة","Deterministic":"حتمية","Rule-based score; High ≥4 for Version 1":"درجة قائمة على القواعد؛ عالية ≥4 للإصدار الأول","Weekly capacity":"السعة الأسبوعية","No reminder consent OR no mobile on file":"لا موافقة على التذكير أو لا رقم هاتف مسجّل","Weekly prioritised worklist":"قائمة عمل أسبوعية مرتبة بالأولوية","· Verify barrier and choose action":"· تحقق من العائق واختر الإجراء","Barrier-matched outreach suggestion":"اقتراح تواصل مطابق للعائق","Simulated MENA hospital outpatient diabetes clinic, Sunday–Thursday":"عيادة سكري خارجية محاكاة في مستشفى بمنطقة الشرق الأوسط، الأحد–الخميس","Assign owners":"تعيين المسؤولين","Provisional":"مبدئي","Booked ≥90 days ahead":"حجز قبل ≥90 يوماً","Median first outreach":"وسيط أول تواصل","0 / 2 / 4 / 6 pts":"0 / 2 / 4 / 6 نقاط","Quality intelligence view":"عرض ذكاء الجودة","Presenter's core message":"الرسالة الأساسية للمقدّم","Test first":"اختبر أولاً","Automated clinical decisions":"قرارات سريرية مؤتمتة","Weekly worklist":"قائمة العمل الأسبوعية","“AccessBridge helps the diabetes clinic move from reactive outreach after a missed appointment to proactive, prioritised follow-up before the next visit. It combines a transparent risk worklist, barrier-aware outreach suggestions and structured outcome logging, while keeping decisions with the care coordinator.”":"«يساعد AccessBridge عيادة السكري على الانتقال من التواصل التفاعلي بعد الموعد الفائت إلى متابعة استباقية مرتبة بالأولوية قبل الزيارة التالية. يجمع بين قائمة عمل شفافة للخطورة، واقتراحات تواصل واعية بالعوائق، وتسجيل مهيكل للنتائج، مع إبقاء القرار بيد منسّق الرعاية.»","Working position":"الموقف العملي","Verify with patient":"التحقق مع المريض","Rule score ≥4 · coordinator review":"درجة القاعدة ≥4 · مراجعة المنسّق","After a missed visit · synthetic baseline":"بعد موعد فائت · خط أساس اصطناعي","Capacity limits must be agreed with the clinic; patients beyond capacity remain visible and are not silently discarded.":"يجب الاتفاق على حدود السعة مع العيادة؛ ويظل المرضى الذين يتجاوزون السعة ظاهرين ولا يُستبعدون بصمت.","Validate status + timestamp":"التحقق من الحالة + الطابع الزمني","Human-in-the-loop":"الإنسان في الحلقة","Patient-facing application":"تطبيق موجّه للمرضى","· Open a high-risk patient":"· افتح مريضاً عالي الخطورة","Could leave high-priority cases unactioned":"قد يترك حالات عالية الأولوية دون إجراء","Choose outreach":"اختيار التواصل","Version 1 scope discipline":"انضباط نطاق الإصدار الأول","Potential barriers are signals, not facts. Confirm with the patient before selecting a response.":"العوائق المحتملة إشارات وليست حقائق. تأكد مع المريض قبل اختيار الاستجابة.","Transport-booking integration":"تكامل حجز المواصلات","Payer, nationality, language, sex and age are not score inputs. They are retained for subgroup equity audit.":"جهة الدفع والجنسية واللغة والجنس والعمر ليست مدخلات للدرجة، ويُحتفظ بها لتدقيق إنصاف المجموعات الفرعية.","Could cause an unauthorised reminder":"قد يسبب تذكيراً غير مصرح به","Risk score prioritises outreach only; it never removes a patient from care or routine reminders.":"درجة الخطورة ترتّب أولويات التواصل فقط؛ ولا تُخرج أي مريض من الرعاية أو التذكيرات الروتينية.","Human oversight & safe handling":"الإشراف البشري والتعامل الآمن","High / Medium / Low":"عالية / متوسطة / منخفضة","Governance roles":"أدوار الحوكمة","Barrier inferred from proxy":"عائق مستنتج من مؤشر بديل","+1 pt":"+1 نقطة","Wrong / stale appointment status":"حالة موعد خاطئة / قديمة","Excluded":"مستبعد","Coordinator capacity exceeded":"تجاوز سعة المنسّق","Residence 60+ km":"الإقامة على بعد 60+ كم","Could lead to inappropriate outreach":"قد يؤدي إلى تواصل غير مناسب","Could place a cancelled visit on the worklist":"قد تضع زيارة ملغاة في قائمة العمل","Included":"مشمول","Record coordinator action, outcome and patient-reported barrier; preserve an auditable history in a real system.":"سجّل إجراء المنسّق والنتيجة والعائق المبلّغ عنه من المريض؛ واحتفظ بسجل قابل للتدقيق في النظام الفعلي.","Show queue + overdue":"إظهار القائمة + المتأخر","· Explain measurement and equity":"· اشرح القياس والإنصاف","4 minutes":"4 دقائق","Approximately six high-risk patients estimated from synthetic analysis; validate with coordinator":"نحو ستة مرضى عاليي الخطورة مقدَّرون من التحليل الاصطناعي؛ يُتحقق منه مع المنسّق","Verify the barrier":"التحقق من العائق","Proposed controls":"ضوابط مقترحة","Project decision register":"سجل قرارات المشروع","Lower threshold for other-language / remote patients":"حد أدنى لمرضى اللغات الأخرى / المناطق البعيدة","Three MVP features":"ثلاث ميزات للمنتج الأولي","Action, outcome and patient-reported barrier are structured.":"الإجراء والنتيجة والعائق المبلّغ عنه من المريض مهيكلة.","Adopt":"معتمد","Equity Steward and Clinic Quality Lead; separate ownership preferred":"مسؤول الإنصاف وقائد جودة العيادة؛ يُفضّل فصل الملكية","Coordinator selects an appropriate action; consent rules apply.":"يختار المنسّق الإجراء المناسب؛ وتنطبق قواعد الموافقة.","Subgroup under-identification":"نقص تحديد المجموعات الفرعية","Project setting":"سياق المشروع","705 / 3,298 synthetic attended-or-no-show visits":"705 / 3,298 زيارة اصطناعية محضورة أو متغيّبة","Consent / contact route missing":"الموافقة / قناة الاتصال مفقودة","Monitor subgroup sensitivity and no-show disparities; review the rule if patient mix or data quality changes.":"راقب حساسية المجموعات الفرعية وتفاوتات التغيّب؛ وراجع القاعدة إذا تغيّر مزيج المرضى أو جودة البيانات.","Block message action":"حظر إجراء الرسالة","· Save action, outcome and barrier":"· احفظ الإجراء والنتيجة والعائق","Historical no-show rate":"معدل التغيّب التاريخي","High-risk sensitivity":"حساسية عالية الخطورة","Risk threshold":"حد الخطورة","Monthly monitoring supports process review and subgroup audit.":"المراقبة الشهرية تدعم مراجعة العملية وتدقيق المجموعات الفرعية.","Risk score · transparent rules":"درجة الخطورة · قواعد شفافة","Prior no-shows = 0 / 1 / 2 / ≥3":"التغيّبات السابقة = 0 / 1 / 2 / ≥3","Project":"المشروع","AccessBridge: care before the missed visit":"AccessBridge: رعاية قبل الموعد الفائت","What the project is, how the score works, the safeguards, the decision register and the presenter script. The working screens are in the other tabs.":"ما هو المشروع، وكيف تعمل الدرجة، والضمانات، وسجل القرارات، ونص المقدّم. الشاشات العاملة في التبويبات الأخرى.","days":"أيام","AUC 0.66 · modest, transparent rule":"AUC 0.66 · قاعدة شفافة متواضعة الأداء","Feature":"الميزة","What happens":"ما يحدث","IDENTIFY":"تحديد","REVIEW":"مراجعة","ACT":"إجراء","LEARN":"تعلّم","Compare threshold 3 against threshold 4; do not automatically adopt":"قارن الحد 3 بالحد 4؛ لا تعتمد تلقائياً","Not clinically validated or production-ready. The risk rule's reported AUC is 0.66 and sensitivity is 30.5% at the High cut-off. The report explicitly cautions that its synthetic data was generated using the same factors and likely overstates real-world performance. A prospective, subgroup-aware validation and workflow-capacity assessment are required before any clinical deployment.":"غير مُتحقَّق منه سريرياً وغير جاهز للإنتاج. AUC المبلّغ عنه لقاعدة الخطورة 0.66 والحساسية 30.5% عند حد «عالية». يحذّر التقرير صراحةً من أن بياناته الاصطناعية أُنشئت بالعوامل نفسها وربما تبالغ في تقدير الأداء الواقعي. يلزم تحقق استباقي يراعي المجموعات الفرعية وتقييم لسعة سير العمل قبل أي نشر سريري.","Theme":"المظهر","Clinic:":"العيادة:","Diabetes outpatient (simulated)":"عيادة السكري الخارجية (محاكاة)","Role:":"الدور:","Role":"الدور","Coordinator":"منسّق","Lead coordinator":"مسؤول التنسيق","Quality lead":"قائد الجودة","Synthetic data · prototype":"بيانات اصطناعية · نموذج أولي","Patient registry":"سجل المرضى","Patient registry and chart. Synthetic records only; the AccessBridge card shows the score and its factors.":"سجل المرضى والملف الطبي. سجلات اصطناعية فقط؛ تعرض بطاقة AccessBridge الدرجة وعواملها.","Clinic appointments, Sunday to Thursday. Record attendance after the visit; visits rebooked in AccessBridge appear here.":"مواعيد العيادة من الأحد إلى الخميس. سجّل الحضور بعد الزيارة؛ وتظهر هنا الزيارات المُعاد حجزها في AccessBridge.","Laboratory and referral orders. Place, collect, enter results or cancel.":"طلبات المختبر والإحالات. أنشئ الطلب، وسجّل سحب العينة، وأدخل النتيجة، أو ألغِه.","Resulted tests with reference ranges and flags. Shown for clinical context only.":"الفحوص الصادرة نتائجها مع النطاقات المرجعية والتنبيهات. تُعرض للسياق السريري فقط.","Search ID, appointment or patient no.":"ابحث بالمعرّف أو الموعد أو رقم المريض","Filter":"تصفية","All patients":"كل المرضى","On AccessBridge list":"على قائمة AccessBridge","Routine reminders only":"تذكيرات روتينية فقط","patients":"مريض","No patients match.":"لا يوجد مرضى مطابقون.","Distance":"المسافة","<10 km":"أقل من 10 كم","10-29 km":"10–29 كم","30-59 km":"30–59 كم","60+ km":"60+ كم","Prior no-shows (12 months)":"التغيّبات السابقة (12 شهراً)","Open in AccessBridge":"فتح في AccessBridge","Not on the outreach list · routine reminder only":"ليس على قائمة التواصل · تذكير روتيني فقط","Open chart":"فتح الملف","Appointments":"المواعيد","Outreach log":"سجل التواصل","No outreach recorded for this patient.":"لم يُسجّل تواصل لهذا المريض.","Time":"الوقت","Type":"النوع","Appointment":"الموعد","Date":"التاريخ","Order":"الطلب","Test":"الفحص","Actions":"الإجراءات","Value":"القيمة","Reference":"المرجع","Flag":"التنبيه","New order":"طلب جديد","Place order":"إنشاء الطلب","Order placed.":"تم إنشاء الطلب.","Choose a patient and a test.":"اختر مريضاً وفحصاً.","Collect":"سحب العينة","Refer":"إحالة","Cancel":"إلغاء","Save result":"حفظ النتيجة","Enter value":"أدخل القيمة","Sample collected.":"تم سحب العينة.","Order cancelled.":"تم إلغاء الطلب.","Result saved.":"تم حفظ النتيجة.","Enter a value between":"أدخل قيمة بين","and":"و","Choose the screening outcome.":"اختر نتيجة الفحص.","Order date":"تاريخ الطلب","Order list":"قائمة الطلبات","Ordered":"مطلوب","Collected":"تم السحب","Resulted":"صدرت النتيجة","Cancelled":"ملغى","Open":"مفتوح","All":"الكل","Open orders":"الطلبات المفتوحة","ordered or collected":"مطلوبة أو تم سحبها","Awaiting collection":"بانتظار السحب","sample or referral not done":"لم تُسحب العينة أو تتم الإحالة","Awaiting result":"بانتظار النتيجة","enter the value to close":"أدخل القيمة للإغلاق","visible in Results":"تظهر في النتائج","Booked":"محجوز","Rescheduled":"أُعيدت جدولته","Rebooked":"أُعيد حجزه","Attended":"حضر","No-show":"تغيّب","Clinic cancellation":"إلغاء من العيادة","moved to":"نُقل إلى","rebooked from":"أُعيد حجزه من","Attendance can be recorded on or after the visit date. Move Today forward.":"يُسجّل الحضور في يوم الزيارة أو بعده. قدّم تاريخ «اليوم».","This visit was moved in AccessBridge. Record the outcome on the new appointment.":"نُقلت هذه الزيارة في AccessBridge. سجّل النتيجة على الموعد الجديد.","Status saved.":"تم حفظ الحالة.","Booked visits":"الزيارات المحجوزة","waiting for the visit day":"بانتظار يوم الزيارة","No-show rate · flagged":"معدل التغيّب · المُعلَّمون","No-show rate · others":"معدل التغيّب · الآخرون","recorded visits":"زيارات مسجّلة","score 4 or more":"الدرجة 4 فأكثر","Late cancellations":"الإلغاءات المتأخرة","balancing measure, not a no-show":"مقياس موازنة وليس تغيّباً","Clinic diary · Sunday to Thursday":"مفكرة العيادة · الأحد إلى الخميس","Range":"النطاق","All dates":"كل التواريخ","Rebooked later":"أُعيد حجزها لاحقاً","Flagged only":"المُعلَّمون فقط","Routine reminder":"تذكير روتيني","Attendance is recorded after the visit. Late cancellation = patient cancels or reschedules 1 day or less before the visit; reported separately. Clinic cancellations are excluded from the no-show rate.":"يُسجّل الحضور بعد الزيارة. الإلغاء المتأخر = إلغاء أو إعادة جدولة من المريض قبل الزيارة بيوم أو أقل؛ ويُبلَّغ عنه منفصلاً. تُستبعد إلغاءات العيادة من معدل التغيّب.","Results shown":"النتائج المعروضة","of":"من","resulted tests":"فحصاً صدرت نتيجته","Abnormal":"غير طبيعي","outside the reference range":"خارج النطاق المرجعي","Median latest HbA1c":"وسيط آخر HbA1c","latest result per patient":"آخر نتيجة لكل مريض","HbA1c 9% or more":"HbA1c ‏9% فأكثر","of them on the AccessBridge list":"منهم على قائمة AccessBridge","Resulted tests":"الفحوص الصادرة نتائجها","All tests":"كل الفحوص","Abnormal only":"غير الطبيعي فقط","Results are clinical context only. They are not inputs to the AccessBridge score.":"النتائج للسياق السريري فقط، وليست مدخلات لدرجة AccessBridge.","AccessBridge score":"درجة AccessBridge","In target":"ضمن الهدف","Very high":"مرتفع جداً","Very low":"منخفض جداً","Normal":"طبيعي","High":"مرتفع","Low":"منخفض","Medium":"متوسط","No retinopathy":"لا يوجد اعتلال شبكية","Retinopathy found":"يوجد اعتلال شبكية","HbA1c":"الهيموغلوبين السكري HbA1c","Fasting glucose":"سكر صائم","Lipid panel (LDL)":"دهون الدم (LDL)","Urine ACR":"نسبة الألبومين/الكرياتينين في البول","Creatinine / eGFR":"الكرياتينين / معدل الترشيح","Retinal screening referral":"إحالة لفحص الشبكية","%":"%","mg/dL":"ملغ/دل","mg/g":"ملغ/غ","mL/min/1.73m²":"مل/د/1.73م²","UCL":"الحد الأعلى","LCL":"الحد الأدنى","HIS modules":"وحدات النظام","Switch language":"تبديل اللغة","Toggle light or dark theme":"تبديل المظهر الفاتح أو الداكن","Simulated date":"التاريخ المحاكى","AccessBridge views":"عروض AccessBridge","Worklist":"قائمة العمل","Log":"السجل","Close":"إغلاق","Sidebar":"الشريط الجانبي","Sun":"الأحد","Mon":"الاثنين","Tue":"الثلاثاء","Wed":"الأربعاء","Thu":"الخميس","Fri":"الجمعة","Sat":"السبت","Saved.":"تم الحفظ.","Moved to Done.":"نُقل إلى «تم».","Callback set; patient returns to the list on":"تم ضبط معاودة الاتصال؛ يعود المريض إلى القائمة في","Undo for":"تراجع خلال","min":"دقيقة","Undo":"تراجع","Entry undone.":"تم التراجع عن الإدخال.","undone":"مُتراجَع عنه","instead of suggestion":"بدلاً من الاقتراح",
+"Choose an outcome first.":"اختر النتيجة أولاً.","Reminder blocked: no mobile number or no reminder consent.":"تم حظر التذكير: لا رقم هاتف أو لا موافقة تذكير.","Phone call blocked: no usable number on file.":"تم حظر الاتصال: لا يوجد رقم صالح مسجّل.","Choose a reason for the different action.":"اختر سبباً للإجراء المختلف.","Enter the callback date.":"أدخل تاريخ معاودة الاتصال.",
+"Mobile and consent on file":"الهاتف والموافقة مسجّلان","No mobile or no reminder consent":"لا هاتف أو لا موافقة تذكير","Lives 60+ km":"يسكن على بعد 60+ كم","no mobile number on file — do not send SMS or WhatsApp":"لا رقم هاتف مسجّل — لا ترسل SMS أو واتساب","no reminder consent — SMS and WhatsApp are not permitted":"لا موافقة تذكير — SMS وواتساب غير مسموح بهما","lives 60+ km away":"يسكن على بعد 60+ كم","no specific barrier in the score":"لا عائق محدد في الدرجة"};
+Object.assign(AR,{"Business case": "الحالة المالية", "Reset demo": "إعادة ضبط العرض", "4.5 minutes": "4.5 دقيقة", "· Show what it costs and returns inside the HIS": "· عرض التكلفة والعائد داخل نظام المعلومات", "Business case: what the module costs and returns inside the HIS": "الحالة المالية: تكلفة الوحدة وعائدها داخل نظام معلومات المستشفى", "The same 36-month model as the financial workbook. Change an input and watch the break-even move. The inputs marked unvalidated are assumptions to confirm at a pilot site.": "النموذج نفسه ذو الـ36 شهرًا في ملف الإكسل. غيّر أي مدخل وراقب نقطة التعادل. المدخلات غير المتحقق منها افتراضات تُؤكَّد في موقع تجريبي.", "Retry": "إعادة محاولة", "retry": "إعادة محاولة", "closed": "مغلقة", "Closed": "مغلقة", "attempt": "المحاولة", "Callbacks and retries scheduled": "الاستدعاءات وإعادات المحاولة المجدولة", "Closed · escalated to the clinic lead": "مغلقة · محالة إلى قائد العيادة", "Letter sent, no response": "أُرسل خطاب دون رد", "Transferred to another clinic": "حُوِّل إلى عيادة أخرى", "Not reached. Retry on": "لم يُتمكَّن من الوصول إليه. إعادة المحاولة في", "third attempt failed, handed to the clinic lead": "فشلت المحاولة الثالثة، أُحيلت إلى قائد العيادة", "transferred out": "حُوِّل إلى خارج العيادة", "visit date reached, left to the clinic lead": "حان موعد الزيارة، تُركت لقائد العيادة", "One callback return only. Choose another outcome or hand over to the clinic lead.": "عودة واحدة فقط بعد الاستدعاء. اختر نتيجة أخرى أو أحِل الحالة إلى قائد العيادة.", "Could not store the log in this browser. Entries stay on this page only.": "تعذّر حفظ السجل في هذا المتصفح. تبقى الإدخالات في هذه الصفحة فقط.", "no mobile number on file — do not send SMS or WhatsApp; verify the contact route (the clinic nurse can phone the patient)": "لا يوجد رقم جوال مسجّل — لا ترسل رسالة نصية أو واتساب؛ تحقق من وسيلة التواصل (يمكن لممرضة العيادة الاتصال بالمريض)", "Module inside the HIS": "وحدة داخل نظام المعلومات", "Stand-alone tool": "أداة مستقلة", "Inputs": "المدخلات", "Reset inputs": "إعادة ضبط المدخلات", "Relative no-show cut (flagged group)": "خفض نسبي لعدم الحضور (المجموعة المصنّفة)", "Value of a recovered visit (EGP)": "قيمة الزيارة المستردّة (جنيه)", "HIS interface cost, one-off (EGP) · unvalidated": "تكلفة واجهة الربط مع النظام، مرة واحدة (جنيه) · غير متحقق منها", "Coordinator minutes per flagged patient · unvalidated": "دقائق المنسّق لكل مريض مصنّف · غير متحقق منها", "Year-3 realisation (capped at 90%)": "نسبة التحقق في السنة الثالثة (بحد أقصى 90%)", "3-year ROI": "العائد على الاستثمار لثلاث سنوات", "3-year net benefit (EGP)": "صافي المنفعة لثلاث سنوات (جنيه)", "Break-even month": "شهر التعادل", "Year-3 net (EGP)": "صافي السنة الثالثة (جنيه)", "Cumulative net position (EGP thousand)": "الموقف التراكمي الصافي (ألف جنيه)", "month": "الشهر", "not within 36": "لا يتحقق خلال 36", "Scenario": "السيناريو", "Low (10%, EGP 400)": "منخفض (10%، 400 جنيه)", "Base (20%, EGP 750)": "أساسي (20%، 750 جنيه)", "High (30%, EGP 1,500)": "مرتفع (30%، 1,500 جنيه)", "Stand-alone tool, same effect": "أداة مستقلة، التأثير نفسه", "ROI": "العائد", "Net (EGP)": "الصافي (جنيه)", "Break-even": "التعادل", "Scenarios · fixed inputs": "السيناريوهات · مدخلات ثابتة", "Go-live in month 4; 1, 5 and 12 clinics live in years 1 to 3; realisation 20%, 40% and the year-3 value above. Hosting is assumed to be absorbed by the hospital's IT.": "التشغيل في الشهر 4؛ 1 و5 و12 عيادة في السنوات 1 إلى 3؛ نسبة التحقق 20% و40% وقيمة السنة الثالثة أعلاه. يُفترض أن تتحمل إدارة تقنية المستشفى الاستضافة.", "Unvalidated inputs: the HIS interface (EGP 150,000), hosting absorbed by the hospital, 6 minutes per patient, and the EGP 750 value of a recovered visit. The SMS-reminder option (about +29%, month 32) is in the workbook. Planning assumptions, not forecasts.": "مدخلات غير متحقق منها: واجهة الربط (150,000 جنيه)، واستضافة تتحملها المستشفى، و6 دقائق لكل مريض، وقيمة الزيارة المستردّة 750 جنيهًا. خيار التذكير بالرسائل (نحو +29%، الشهر 32) في ملف الإكسل. افتراضات تخطيط وليست تنبؤات.", "Market, EGP a year: TAM about 374 m · SAM about 142 m (upper bound) · SOM about 1.27 m (year-3 target, 12 clinics).": "السوق بالجنيه سنويًا: TAM نحو 374 مليونًا · SAM نحو 142 مليونًا (حد أعلى) · SOM نحو 1.27 مليون (هدف السنة الثالثة، 12 عيادة).", "min": "د"});
+Object.assign(AR,{"Kept on this page only, not stored.": "محفوظ في هذه الصفحة فقط، غير مخزّن.", "This case is closed and handed to the clinic lead. Undo the closing entry to change it.": "هذه الحالة مغلقة وأُحيلت إلى مسؤول العيادة. تراجع عن إدخال الإغلاق لتعديلها.", "\"No action\" cannot be combined with a reached outcome. Choose the action that was taken.": "لا يمكن الجمع بين «لا إجراء» ونتيجة تم فيها الوصول للمريض. اختر الإجراء الذي تم.", "Unknown / not asked": "غير معروف / لم يُسأل", "No barrier reported": "لم يُذكر عائق"});
+
+Object.assign(AR,{"Order not placed: browser storage failed.":"لم يُسجَّل الطلب: فشل تخزين المتصفح."});
+
+Object.assign(AR,{"Browser storage failed. Nothing was saved.":"فشل تخزين المتصفح. لم يُحفظ شيء."});
+
+const AR_RULES=[[/^(\d+) prior no-shows$/,m=>`${m[1]} تغيّبات سابقة`],[/^Lives (.+)$/,m=>`يسكن ${m[1].replace("km","كم")}`],[/^Booked (\d+) days ahead$/,m=>`حُجز قبل ${m[1]} يوماً`],[/^(\d+) prior no-shows — ask what would help the patient attend$/,m=>`${m[1]} تغيّبات سابقة — اسأل عمّا يساعد المريض على الحضور`],[/^booked (\d+) days ahead$/,m=>`حُجز قبل ${m[1]} يوماً`]];
+function t(s){if(state.lang!=="ar")return s;if(AR[s])return AR[s];for(const [re,f] of AR_RULES){const m=s.match(re);if(m)return f(m)}return s}
+const STATIC=[...document.querySelectorAll("[data-i18n]")].map(e=>[e,e.textContent]);
+const STATIC_ARIA=[...document.querySelectorAll("[aria-label]")].map(e=>[e,e.getAttribute("aria-label")]);
+const AR_D="٠١٢٣٤٥٦٧٨٩",PROT=/(DM-[A-Z0-9]+|AP\d+(?:-R\d+)?|OR\d{4}|HbA1c|LDL|eGFR|HL7 v2|FHIR)/;
+const DIGORIG=new WeakMap();
+function arD(txt){return txt.split(PROT).map((x,i)=>i%2?x:x.replace(/\d/g,d=>AR_D[d]).replace(/([٠-٩])\.(?=[٠-٩])/g,"$1٫").replace(/([٠-٩]),(?=[٠-٩]{3})/g,"$1٬").replace(/%/g,"٪")).join("")}
+function digitsPass(root){if(state.lang!=="ar")return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
+ while(n=w.nextNode()){const pe=n.parentElement;if(!pe||pe.closest("script,style"))continue;const v=n.nodeValue;if(!/[\d%]/.test(v))continue;const c=arD(v);if(c!==v){if(!DIGORIG.has(n))DIGORIG.set(n,v);n.nodeValue=c}}
+ root.querySelectorAll&&root.querySelectorAll("[placeholder]").forEach(e=>{const v=e.getAttribute("placeholder");if(/\d/.test(v))e.setAttribute("placeholder",arD(v))})}
+function digitsRestore(){const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){if(DIGORIG.has(n)&&/[٠-٩٪]/.test(n.nodeValue)){n.nodeValue=DIGORIG.get(n);DIGORIG.delete(n)}}}
+new MutationObserver(ms=>{if(state.lang!=="ar")return;for(const m of ms){if(m.type==="characterData"){const v=m.target.nodeValue;if(/[\d%]/.test(v)){const c=arD(v);if(c!==v)m.target.nodeValue=c}}else m.addedNodes.forEach(nd=>{if(nd.nodeType===3){const v=nd.nodeValue;if(/[\d%]/.test(v)){const c=arD(v);if(c!==v)nd.nodeValue=c}}else if(nd.nodeType===1)digitsPass(nd)})}}).observe(document.body,{subtree:true,childList:true,characterData:true});
+/* v5: Arabic for the consent additions */
+Object.assign(AR,{"No data consent": "لا موافقة على البيانات", "no data consent (routine reminder only)": "بلا موافقة على البيانات (تذكير روتيني فقط)", "Data consent": "موافقة البيانات", "The patient said no to data use in AccessBridge (consent form, Part A). AccessBridge shows no score and no outreach for this patient. The clinic sends the routine reminder, as for every patient. Care does not change.": "رفض المريض استخدام بياناته في AccessBridge (نموذج الموافقة، الجزء أ). لا يعرض AccessBridge أي درجة أو تواصل لهذا المريض. ترسل العيادة التذكير الروتيني كما لكل مريض. لا تتغيّر الرعاية.", "No data consent: routine clinic reminder only.": "لا موافقة على البيانات: تذكير العيادة الروتيني فقط.", "Not processed by AccessBridge · routine reminder only": "لا يعالجه AccessBridge · تذكير روتيني فقط", "A patient who says no to data use stays visible as “No data consent”. AccessBridge does not score or contact the patient; the routine clinic reminder continues.": "المريض الذي يرفض استخدام بياناته يبقى ظاهراً بحالة «لا موافقة على البيانات». لا يحسب AccessBridge له درجة ولا يتواصل معه، ويستمر تذكير العيادة الروتيني.", "Patient consent · two separate parts": "موافقة المريض · جزآن منفصلان", "Draft for ethics review": "مسودة للمراجعة الأخلاقية", "Print consent form (English + Arabic)": "طباعة نموذج الموافقة (إنجليزي + عربي)", "Part": "الجزء", "The patient agrees that": "يوافق المريض على أن", "If the patient says no": "إذا رفض المريض", "A · Data use": "أ · استخدام البيانات", "The clinic stores and uses the patient's appointment and contact data in AccessBridge, an online system inside the hospital network, to plan outreach and to check quality and fairness.": "تحفظ العيادة بيانات مواعيد المريض وبيانات الاتصال به وتستخدمها في AccessBridge، وهو نظام إلكتروني داخل شبكة المستشفى، لتخطيط التواصل ومراجعة الجودة والعدالة.", "The patient stays visible as “No data consent”. No score and no outreach. The routine clinic reminder continues. Care does not change.": "يبقى المريض ظاهراً بحالة «لا موافقة على البيانات». لا درجة ولا تواصل. يستمر تذكير العيادة الروتيني. لا تتغيّر الرعاية.", "B · SMS / WhatsApp reminders": "ب · التذكير عبر SMS / واتساب", "The clinic sends visit reminders by SMS or WhatsApp to the patient's mobile number.": "ترسل العيادة تذكيرات المواعيد عبر SMS أو واتساب إلى هاتف المريض المحمول.", "No messages. The coordinator can phone the patient or send a letter.": "لا رسائل. يمكن للمنسّق الاتصال بالمريض هاتفياً أو إرسال خطاب.", "The patient can agree to Part A and refuse Part B. The patient can withdraw either part at any time. The hospital data protection officer and the ethics committee must review the wording (Egypt, Law No. 151 of 2020).": "يمكن للمريض الموافقة على الجزء أ ورفض الجزء ب، ويمكنه سحب أي جزء في أي وقت. يجب أن يراجع مسؤول حماية البيانات في المستشفى ولجنة الأخلاقيات الصياغة (مصر، القانون رقم 151 لسنة 2020).", "Patient data consent": "موافقة المريض على البيانات", "Two separate consents: data use in AccessBridge (Part A) and SMS/WhatsApp reminders (Part B); form drafted for ethics review": "موافقتان منفصلتان: استخدام البيانات في AccessBridge (الجزء أ) والتذكير عبر SMS/واتساب (الجزء ب)؛ النموذج مسودة للمراجعة الأخلاقية", "Reminder consent as a score input": "موافقة التذكير كمدخل في الدرجة", "Kept in Version 1 (+1 point); decide whether it should be a channel rule only (go-online plan, decision 5)": "مُبقاة في الإصدار الأول (+1 نقطة)؛ يُقرَّر هل تكون قاعدة لقناة التواصل فقط (خطة الإطلاق، القرار 5)", "Allow pop-ups for this page to print the consent form.": "اسمح بالنوافذ المنبثقة لهذه الصفحة لطباعة نموذج الموافقة."});
+/* v5: printable patient consent form (English + Arabic). Draft for ethics review; opens in a new window and prints. */
+function consentFormHtml(){
+ const box='<span class="cb"></span>';
+ const EN=`<section class="pg" dir="ltr" lang="en">
+ <h1>Patient consent form</h1><p class="sub">AccessBridge care coordination · Diabetes outpatient clinic</p>
+ <p class="draft">DRAFT FOR ETHICS REVIEW · version 0.1 · 12 Nov 2026. Do not use with patients until the ethics committee and the hospital data protection officer approve it.</p>
+ <table class="f"><tr><td>Patient name</td><td class="ln"></td></tr><tr><td>Hospital file number</td><td class="ln"></td></tr><tr><td>Mobile number</td><td class="ln"></td></tr></table>
+ <h2>About AccessBridge</h2>
+ <p>The clinic uses AccessBridge to contact patients before their visit and to help them attend. AccessBridge is part of the hospital information system. It runs on a secure server that the hospital approves. Only clinic staff who take part in your care can see your data. The system records every view and every change.</p>
+ <h2>Part A · Use of my data in AccessBridge</h2>
+ <p><b>Data that AccessBridge uses:</b> your name and file number, your appointment dates, the number of missed visits in the last 12 months, the distance band from your home to the clinic, your language, your mobile number, and short notes about what makes it hard to attend.</p>
+ <p><b>Why:</b> to decide whom the coordinator contacts first, to record each contact, and to check every month that the service is fair for all patient groups. Monthly reports use counts only, never names.</p>
+ <p><b>Not used for:</b> decisions about your treatment, advertising, or sale to others.</p>
+ <p><b>Kept for:</b> ____________ (the hospital fills in the period). Then the data is deleted.</p>
+ <p class="ck">${box} I agree &nbsp;&nbsp;&nbsp; ${box} I do not agree</p>
+ <p class="small">If you do not agree, your care does not change. You still receive the clinic's routine reminder. The coordinator does not contact you through AccessBridge.</p>
+ <h2>Part B · Reminders by SMS or WhatsApp</h2>
+ <p>The clinic can send reminders about my visits by SMS or WhatsApp to the mobile number above.</p>
+ <p class="ck">${box} I agree &nbsp;&nbsp;&nbsp; ${box} I do not agree</p>
+ <p class="small">If you do not agree, the clinic can phone you or send a letter. Part B is separate from Part A: you can agree to one and not to the other.</p>
+ <h2>Your rights</h2>
+ <p>You can withdraw Part A, Part B or both at any time. Tell the clinic reception or call ____________. Withdrawal stops future use. It does not change your care. You can ask to see the data that the clinic keeps about you.</p>
+ <table class="f sig"><tr><td>Patient or legal representative · name</td><td class="ln"></td><td>Signature</td><td class="ln"></td><td>Date</td><td class="ln s"></td></tr>
+ <tr><td>If representative · relationship to the patient</td><td class="ln" colspan="5"></td></tr>
+ <tr><td>Staff member who explained the form · name</td><td class="ln"></td><td>Signature</td><td class="ln"></td><td>Date</td><td class="ln s"></td></tr></table>
+ <p class="foot">Health data is sensitive personal data under Egypt's Personal Data Protection Law (Law No. 151 of 2020). This draft is not legal advice. Prototype material · synthetic data only.</p></section>`;
+ const AR_=`<section class="pg" dir="rtl" lang="ar">
+ <h1>نموذج موافقة المريض</h1><p class="sub">تنسيق الرعاية AccessBridge · عيادة السكري الخارجية</p>
+ <p class="draft">مسودة للمراجعة الأخلاقية · الإصدار 0.1 · 12 نوفمبر 2026. لا يُستخدم مع المرضى قبل موافقة لجنة الأخلاقيات ومسؤول حماية البيانات في المستشفى.</p>
+ <table class="f"><tr><td>اسم المريض</td><td class="ln"></td></tr><tr><td>رقم الملف الطبي</td><td class="ln"></td></tr><tr><td>رقم الهاتف المحمول</td><td class="ln"></td></tr></table>
+ <h2>عن AccessBridge</h2>
+ <p>تستخدم العيادة نظام AccessBridge للتواصل مع المرضى قبل مواعيدهم ومساعدتهم على الحضور. النظام جزء من نظام معلومات المستشفى، ويعمل على خادم آمن يعتمده المستشفى. لا يطّلع على بياناتك إلا موظفو العيادة المشاركون في رعايتك، ويسجّل النظام كل اطلاع وكل تعديل.</p>
+ <h2>الجزء أ · استخدام بياناتي في AccessBridge</h2>
+ <p><b>البيانات التي يستخدمها النظام:</b> اسمك ورقم ملفك، ومواعيدك، وعدد المواعيد الفائتة خلال آخر 12 شهراً، وفئة المسافة بين منزلك والعيادة، ولغتك، ورقم هاتفك المحمول، وملاحظات قصيرة عمّا يصعّب عليك الحضور.</p>
+ <p><b>الغرض:</b> تحديد من يتواصل معه المنسّق أولاً، وتسجيل كل تواصل، والتحقق كل شهر من أن الخدمة عادلة لجميع فئات المرضى. تستخدم التقارير الشهرية أعداداً فقط، ولا تذكر الأسماء أبداً.</p>
+ <p><b>لا تُستخدم في:</b> قرارات علاجك، أو الإعلانات، أو البيع لأي جهة.</p>
+ <p><b>مدة الاحتفاظ:</b> ____________ (يحددها المستشفى)، ثم تُحذف البيانات.</p>
+ <p class="ck">${box} أوافق &nbsp;&nbsp;&nbsp; ${box} لا أوافق</p>
+ <p class="small">إذا لم توافق، لا تتغيّر رعايتك. يصلك التذكير الروتيني من العيادة كالمعتاد، ولا يتواصل معك المنسّق عبر AccessBridge.</p>
+ <h2>الجزء ب · التذكير عبر الرسائل القصيرة أو واتساب</h2>
+ <p>يمكن للعيادة إرسال تذكير بمواعيدي عبر الرسائل القصيرة (SMS) أو واتساب إلى رقم الهاتف المحمول المذكور أعلاه.</p>
+ <p class="ck">${box} أوافق &nbsp;&nbsp;&nbsp; ${box} لا أوافق</p>
+ <p class="small">إذا لم توافق، يمكن للعيادة الاتصال بك هاتفياً أو إرسال خطاب. الجزء ب منفصل عن الجزء أ: يمكنك الموافقة على أحدهما دون الآخر.</p>
+ <h2>حقوقك</h2>
+ <p>يمكنك سحب موافقتك على الجزء أ أو الجزء ب أو كليهما في أي وقت، بإبلاغ استقبال العيادة أو بالاتصال على ____________. يوقف السحب أي استخدام لاحق، ولا يغيّر رعايتك. ويحق لك طلب الاطلاع على البيانات التي تحتفظ بها العيادة عنك.</p>
+ <table class="f sig"><tr><td>المريض أو الممثل القانوني · الاسم</td><td class="ln"></td><td>التوقيع</td><td class="ln"></td><td>التاريخ</td><td class="ln s"></td></tr>
+ <tr><td>في حال الممثل القانوني · صلته بالمريض</td><td class="ln" colspan="5"></td></tr>
+ <tr><td>الموظف الذي شرح النموذج · الاسم</td><td class="ln"></td><td>التوقيع</td><td class="ln"></td><td>التاريخ</td><td class="ln s"></td></tr></table>
+ <p class="foot">البيانات الصحية بيانات شخصية حساسة وفق قانون حماية البيانات الشخصية المصري (القانون رقم 151 لسنة 2020). هذه المسودة ليست استشارة قانونية. مادة نموذج أولي · بيانات اصطناعية فقط.</p></section>`;
+ return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>AccessBridge · Patient consent form (draft)</title><style>
+ @page{size:A4;margin:16mm 16mm 14mm}
+ body{margin:0;font:11pt/1.45 "Segoe UI",Tahoma,Arial,sans-serif;color:#111;background:#fff}
+ .pg{max-width:178mm;margin:0 auto;padding:6mm 0}.pg+.pg{break-before:page;page-break-before:always}
+ h1{font-size:18pt;margin:0}.sub{margin:2px 0 8px;color:#444}h2{font-size:12pt;margin:12px 0 4px;border-bottom:1px solid #999;padding-bottom:2px}
+ p{margin:4px 0}.small{font-size:9.5pt;color:#333}.draft{border:1.5px solid #111;padding:5px 8px;font-weight:700;font-size:9.5pt}
+ .ck{margin:6px 0;font-weight:600}.cb{display:inline-block;width:11px;height:11px;border:1.5px solid #111;vertical-align:-1px;margin-inline-end:4px}
+ table.f{width:100%;border-collapse:collapse;margin:8px 0}table.f td{padding:7px 4px 2px;font-size:10pt;white-space:nowrap}
+ table.f td.ln{border-bottom:1px solid #111;width:100%}table.sig td.ln{width:30%}table.sig td.ln.s{width:14%}
+ .foot{margin-top:12px;font-size:8.5pt;color:#444;border-top:1px solid #999;padding-top:4px}
+ </style></head><body>${EN}${AR_}</body></html>`}
+function openConsentForm(){const w=window.open("","_blank");if(!w){toast(t("Allow pop-ups for this page to print the consent form."));return}
+ w.document.open();w.document.write(consentFormHtml());w.document.close();setTimeout(()=>{try{w.focus();w.print()}catch(e){}},300)}
+$("#printConsent").addEventListener("click",openConsentForm);
+
+function applyLang(){document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==="ar"?"rtl":"ltr";$("#lang").textContent=state.lang==="ar"?"English":"العربية";STATIC.forEach(([e,en])=>e.textContent=t(en));STATIC_ARIA.forEach(([e,en])=>e.setAttribute("aria-label",t(en)));const _tt=$("#toast");if(_tt){_tt.classList.remove("show");_tt.textContent=""}renderList();renderDetail();renderLog();if(state.view==="lead")renderLead();if(state.view==="report")renderReport();if(state.view==="biz")renderBiz();if(HISV.includes(state.view))renderHis();if(typeof wt!=="undefined"&&wt.on)wtRender();if(state.lang==="ar")digitsPass(document.body);else digitsRestore()}
+$("#lang").addEventListener("click",()=>{state.lang=state.lang==="ar"?"en":"ar";try{localStorage.setItem("abhis_lang",state.lang)}catch(e){}applyLang()});
+try{if(localStorage.getItem("abhis_lang")==="ar")state.lang="ar"}catch(e){}
+Object.assign(AR,{"Clinical modules":"الوحدات السريرية","Skip to content":"انتقل إلى المحتوى","Menu":"القائمة","Next to contact":"التالي للتواصل","Open patient":"افتح ملف المريض","All patients on this list are logged.":"تم تسجيل كل المرضى في هذه القائمة."});
+/* ---- redesign additions: next-patient card, phone menu drawer, table labels for phone cards ---- */
+function renderHero(n){const h=$("#hero");if(!h)return;const nx=P.find(p=>status(p)==="overdue")||P.find(p=>status(p)==="todo");
+ const stats=[[n.todo+n.overdue,"To do"],[n.overdue,"Overdue"],[n.callback+n.retry,"Callback"],[n.done,"Done"]].map(([v,k])=>`<div class="hs"><b>${v}</b><span>${t(k)}</span></div>`).join("");
+ h.innerHTML=`<div class="hero-main"><span class="pop">${t("Next to contact")}</span>${nx?`<h2>${t("Patient")} ${nx.n} <span class="st ${status(nx)}">${t(S[status(nx)])}</span></h2><p class="hero-meta">${t("Contact by")} ${fmt(due(nx))} · ${t("Visit")} ${fmt(nx.date)} ${nx.time} · ${t("Score")} ${nx.score}</p><p class="hero-meta">${t("Suggested action")}: <b>${t(suggest(nx).a)}</b></p><button class="btn light" id="heroOpen" data-id="${nx.id}">${t("Open patient")}</button>`:`<h2>${t("All patients on this list are logged.")}</h2>`}</div><div class="hero-stats">${stats}</div>`;
+ const b=$("#heroOpen");if(b)b.addEventListener("click",()=>{select(b.dataset.id);const d=$("#detail h2");if(d){d.tabIndex=-1;d.focus()}})}
+const navT=$("#navToggle");
+function nav(open){const was=document.body.classList.contains("nav-open");document.body.classList.toggle("nav-open",open);navT.setAttribute("aria-expanded",String(open));if(open){const c=$(".hismods button.on");if(c)c.focus()}else if(was)navT.focus()}
+navT.addEventListener("click",()=>nav(!document.body.classList.contains("nav-open")));
+$("#scrim").addEventListener("click",()=>nav(false));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("nav-open"))nav(false)});
+$$(".hismods button").forEach(b=>b.addEventListener("click",()=>nav(false)));
+function labelCells(){$$("table.lt").forEach(tb=>{const th=[...tb.querySelectorAll("thead th")].map(x=>x.textContent.trim());if(!th.length)return;tb.classList.add("cards");tb.querySelectorAll("tbody tr").forEach(tr=>[...tr.children].forEach((td,i)=>{if(th[i]!==undefined&&!td.hasAttribute("colspan"))td.dataset.label=th[i]}))})}
+let lcq=0;new MutationObserver(()=>{if(!lcq)lcq=requestAnimationFrame(()=>{lcq=0;labelCells()})}).observe(document.body,{childList:true,subtree:true});
+applyLang(); select(P[0].id); labelCells();
+
+/* ===================== Business case · same 36-month engine as the financial workbook ===================== */
+const BZ={mode:"his",red:20,val:750,integ:150000,mins:6,r3:90};
+function bzRun(o){
+ const ldev=40000+0.1875*Math.min(40000,16700),lana=30000+0.1875*Math.min(30000,16700),hc=(15000+0.1875*Math.min(15000,16700))/(21.7*8);
+ const build=6*ldev+2*lana+o.cloud1+20000+o.integ,clin=[1,5,12],real=[0.2,0.4,o.r3];
+ let cum=0,prev=0,be=null,ben=0,cost=0;const series=[],yb=[0,0,0],yc=[0,0,0];
+ for(let m=1;m<=36;m++){const y=Math.ceil(m/12)-1,c=m<4?0:clin[y],nw=Math.max(0,c-prev);prev=c;
+  const flagged=c*12000/12*0.165,b=flagged*0.395*o.red*real[y]*o.val;
+  const run=m<4?0:(o.runAll||y===0?0.4*ldev+0.2*lana:0.2*ldev+0.1*lana),host=m<4?0:(o.hostBase+o.hostPer*c);
+  const k=(m<4?build/3:0)+nw*o.onb+run+host+flagged*o.mins/60*hc;
+  cum+=b-k;ben+=b;cost+=k;yb[y]+=b;yc[y]+=k;series.push(cum);if(be===null&&cum>=0)be=m}
+ return{ben,cost,net:ben-cost,roi:(ben-cost)/cost,be,series,y3:yb[2]-yc[2]}}
+function bzOpts(){const o={red:BZ.red/100,val:BZ.val,mins:BZ.mins,r3:BZ.r3/100};
+ if(BZ.mode==="his"){o.integ=BZ.integ;o.cloud1=0;o.onb=7500;o.hostBase=0;o.hostPer=0;o.runAll=false}
+ else{o.integ=0;o.cloud1=25000;o.onb=15000;o.hostBase=4000;o.hostPer=1000;o.runAll=true}return o}
+const nfm=x=>Math.round(x).toLocaleString("en-US");
+const bzSigned=x=>(x>=0?"+":"−")+nfm(Math.abs(x));
+function bzChart(sr){const c=CP(),W=620,H=220,L=50,R=10,T=10,B=26;
+ const mn=Math.min(0,...sr)/1000,mx=Math.max(0,...sr)/1000,rg=(mx-mn)||1,x=i=>L+i*(W-L-R)/35,y=v=>T+(1-(v/1000-mn)/rg)*(H-T-B);
+ let g="";for(let k=0;k<=4;k++){const v=mn+rg*k/4,yy=T+(1-(v-mn)/rg)*(H-T-B);g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="${c.grid}"/><text x="${L-6}" y="${yy+4}" font-size="10" text-anchor="end" fill="${c.axis}">${Math.round(v)}</text>`}
+ let xl="";[1,12,24,36].forEach(m=>{xl+=`<text x="${x(m-1)}" y="${H-8}" font-size="10" text-anchor="middle" fill="${c.axis}">${m}</text>`});
+ const zero=T+(1-(0-mn)/rg)*(H-T-B),d=sr.map((v,i)=>(i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1)).join(" ");
+ return `<svg viewBox="0 0 ${W} ${H}" width="100%" direction="ltr" role="img" aria-label="${t("Cumulative net position (EGP thousand)")}">${g}<line x1="${L}" x2="${W-R}" y1="${zero}" y2="${zero}" stroke="${c.mean}" stroke-dasharray="4 3"/><path d="${d}" fill="none" stroke="${c.line}" stroke-width="2.5"/>${xl}</svg>`}
+function bzUpdate(){const r=bzRun(bzOpts());
+ const sv=(id,v)=>{const e=$("#bzv_"+id);if(e)e.textContent=v};sv("red",BZ.red+"%");sv("val",nfm(BZ.val));sv("int",nfm(BZ.integ));sv("min",BZ.mins+" "+t("min"));sv("r3",BZ.r3+"%");
+ const roi=$("#bzRoi");roi.textContent=(r.roi>=0?"+":"−")+Math.abs(r.roi*100).toFixed(0)+"%";roi.className="v "+(r.roi>=0?"ok":"bad");
+ const net=$("#bzNet");net.textContent=bzSigned(r.net);net.className="v "+(r.net>=0?"ok":"bad");
+ $("#bzBe").textContent=r.be?t("month")+" "+r.be:t("not within 36");
+ const y3=$("#bzY3");y3.textContent=bzSigned(r.y3);y3.className="v "+(r.y3>=0?"ok":"bad");
+ $("#bzChart").innerHTML=bzChart(r.series)}
+function renderBiz(){
+ const his={cloud1:0,onb:7500,hostBase:0,hostPer:0,runAll:false,integ:150000,mins:6,r3:0.9};
+ const sa={cloud1:25000,onb:15000,hostBase:4000,hostPer:1000,runAll:true,integ:0,mins:10,r3:0.9};
+ const SC=[["Low (10%, EGP 400)",{...his,red:.10,val:400}],["Base (20%, EGP 750)",{...his,red:.20,val:750}],["High (30%, EGP 1,500)",{...his,red:.30,val:1500}],["Stand-alone tool, same effect",{...sa,red:.20,val:750}]]
+  .map(([n,o])=>{const r=bzRun(o);return `<tr><td>${t(n)}</td><td style="text-align:end;color:${r.roi<0?"var(--red)":"inherit"}"><b>${(r.roi>=0?"+":"−")+Math.abs(r.roi*100).toFixed(0)}%</b></td><td style="text-align:end">${bzSigned(r.net)}</td><td style="text-align:end">${r.be?t("month")+" "+r.be:"—"}</td></tr>`}).join("");
+ const sl=(id,lab,min,max,step,key)=>`<div class="sl"><label for="bz_${id}">${t(lab)}</label><b id="bzv_${id}"></b><input type="range" id="bz_${id}" min="${min}" max="${max}" step="${step}" value="${BZ[key]}" data-k="${key}"></div>`;
+ $("#biz").innerHTML=`<div class="bzseg"><button class="btn ${BZ.mode==="his"?"on":""}" data-m="his">${t("Module inside the HIS")}</button><button class="btn ${BZ.mode==="sa"?"on":""}" data-m="sa">${t("Stand-alone tool")}</button></div>
+ <div class="bzk"><div class="kpi"><div class="l">${t("3-year ROI")}</div><div class="v" id="bzRoi">—</div></div><div class="kpi"><div class="l">${t("3-year net benefit (EGP)")}</div><div class="v" id="bzNet">—</div></div><div class="kpi"><div class="l">${t("Break-even month")}</div><div class="v" id="bzBe">—</div></div><div class="kpi"><div class="l">${t("Year-3 net (EGP)")}</div><div class="v" id="bzY3">—</div></div></div>
+ <div class="bzgrid"><section class="panel"><div class="ph"><span>${t("Inputs")}</span><button class="btn ghost" id="bzReset" style="padding:3px 9px;font-size:11.5px">${t("Reset inputs")}</button></div>
+  ${sl("red","Relative no-show cut (flagged group)",10,30,1,"red")}${sl("val","Value of a recovered visit (EGP)",300,1500,50,"val")}${BZ.mode==="his"?sl("int","HIS interface cost, one-off (EGP) · unvalidated",0,400000,10000,"integ"):""}${sl("min","Coordinator minutes per flagged patient · unvalidated",3,12,1,"mins")}${sl("r3","Year-3 realisation (capped at 90%)",50,90,5,"r3")}</section>
+  <section class="panel"><div class="ph"><span>${t("Cumulative net position (EGP thousand)")}</span><small>${t("month")} 1–36</small></div><div class="chart" style="padding:10px" id="bzChart"></div><div class="hint" style="padding:0 12px 10px">${t("Go-live in month 4; 1, 5 and 12 clinics live in years 1 to 3; realisation 20%, 40% and the year-3 value above. Hosting is assumed to be absorbed by the hospital's IT.")}</div></section></div>
+ <section class="panel" style="margin-bottom:12px"><div class="ph"><span>${t("Scenarios · fixed inputs")}</span></div><table class="lt"><thead><tr><th>${t("Scenario")}</th><th style="text-align:end">${t("ROI")}</th><th style="text-align:end">${t("Net (EGP)")}</th><th style="text-align:end">${t("Break-even")}</th></tr></thead><tbody>${SC}</tbody></table></section>
+ <div class="notice" style="display:block;margin-bottom:8px">${t("Unvalidated inputs: the HIS interface (EGP 150,000), hosting absorbed by the hospital, 6 minutes per patient, and the EGP 750 value of a recovered visit. The SMS-reminder option (about +29%, month 32) is in the workbook. Planning assumptions, not forecasts.")}</div>
+ <div class="hint">${t("Market, EGP a year: TAM about 374 m · SAM about 142 m (upper bound) · SOM about 1.27 m (year-3 target, 12 clinics).")}</div>`;
+ $$("#biz [data-m]").forEach(b=>b.addEventListener("click",()=>{BZ.mode=b.dataset.m;BZ.mins=BZ.mode==="his"?6:10;renderBiz()}));
+ $$("#biz input[type=range]").forEach(i=>i.addEventListener("input",()=>{BZ[i.dataset.k]=+i.value;bzUpdate()}));
+ $("#bzReset").addEventListener("click",()=>{Object.assign(BZ,{red:20,val:750,integ:150000,mins:BZ.mode==="his"?6:10,r3:90});renderBiz()});
+ bzUpdate();if(state.lang==="ar")digitsPass($("#biz"))}
+$("#resetDemo").addEventListener("click",()=>{try{sessionStorage.removeItem("abhis");sessionStorage.removeItem("abhis_mod")}catch(e){}location.reload()});
+</script>
+
+</body>
+</html>
