@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AccessBridge Portfolio</title>
+<meta name="description" content="AccessBridge: equity-aware weekly outreach worklist for a diabetes outpatient clinic. Interactive demo and recorded demonstration. Synthetic data only.">
+<style>
+:root{--bg:#f3f7f7;--card:#fff;--ink:#14282b;--muted:#4d6468;--line:#d5e2e3;--accent:#0f766e;--accent-ink:#fff;--warn-bg:#fff4d6;--warn-ink:#6b4a00;--focus:#0b5ed7}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1b1d;--card:#162427;--ink:#e6f1f1;--muted:#9bb3b6;--line:#294044;--accent:#2dd4bf;--accent-ink:#06201d;--warn-bg:#3a2e0c;--warn-ink:#f5d98a;--focus:#7db3ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+main{max-width:720px;margin:0 auto;padding:32px 16px 48px}
+h1{font-size:1.9rem;line-height:1.2;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 20px}
+.note{background:var(--warn-bg);color:var(--warn-ink);border-radius:10px;padding:10px 14px;font-size:.92rem;margin:0 0 24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 20px;margin:0 0 14px}
+.card h2{font-size:1.1rem;margin:0 0 4px}
+.card p{margin:0 0 14px;color:var(--muted)}
+.btn{display:inline-block;min-height:44px;padding:11px 20px;border-radius:10px;font-weight:600;text-decoration:none;border:2px solid var(--accent);color:var(--accent)}
+.btn.main{background:var(--accent);color:var(--accent-ink)}
+.btn:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.tag{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px}
+ul{margin:8px 0 0;padding:0;list-style:none}
+li{padding:8px 0;border-top:1px solid var(--line)}
+li:first-child{border-top:0}
+a{color:var(--accent)}
+.ar{direction:rtl;text-align:right;color:var(--muted);margin:0 0 18px}
+footer{color:var(--muted);font-size:.88rem;margin-top:24px}
+</style>
+</head>
+<body>
+<main>
+<h1>AccessBridge</h1>
+<p class="sub">Equity-aware weekly outreach worklist for a diabetes outpatient clinic<br>Applied Health Informatics &middot; Capstone, Group 3</p>
+<p class="ar" lang="ar" dir="rtl">قائمة أسبوعية لمتابعة المرضى تراعي العدالة في عيادة السكري للمرضى الخارجيين</p>
+<p class="note"><strong>Synthetic data only.</strong> No real patients. Not for clinical use.</p>
+
+<section class="card" aria-labelledby="h-demo">
+<p class="tag">Main demonstration</p>
+<h2 id="h-demo">Interactive demo (HTML)</h2>
+<p>The live page. It opens in your browser and nothing needs to be installed. Works on a phone, in English and Arabic.</p>
+<a class="btn main" href="AccessBridge-Demo.html">Open the demo</a>
+</section>
+
+<section class="card" aria-labelledby="h-video">
+<p class="tag">Optional extra</p>
+<h2 id="h-video">Recorded demonstration (MP4)</h2>
+<p>A recording of the same screens, 2 min 35 s, with a computer-generated voice-over. Synthetic patients only.</p>
+<a class="btn" href="AccessBridge-Demo-Video.mp4">Watch the video</a>
+</section>
+
+<section class="card" aria-labelledby="h-docs">
+<h2 id="h-docs">Supporting documents (PDF)</h2>
+<ul>
+<li><a href="documents/AccessBridge_User_Guide.pdf">User Guide</a></li>
+<li><a href="documents/AccessBridge_Demo_Check_Report.pdf">Demo Check Report</a></li>
+<li><a href="documents/AccessBridge_Patient_Consent_Form.pdf">Patient Consent Form (draft for ethics review)</a></li>
+<li><a href="documents/AccessBridge_Go_Online_Plan.pdf">Plan to Go Online</a></li>
+</ul>
+</section>
+
+<footer>Shariffa Abdulhamid Garwan &middot; Technical implementation and demo lead</footer>
+</main>
+</body>
+</html>
